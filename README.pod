@@ -1,0 +1,83 @@
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
+
+给定单个IP或IP列表，查对应的区域信息，或AS号
+
+=head1 SYNOPSIS
+
+    use Simple::IPInfo;
+    use Data::Dumper;
+    use utf8;
+
+    my $r_loc = get_ip_loc('202.38.64.10');
+    my $r_asn = get_ip_asn('202.38.64.10');
+    print Dumper($r_loc,$r_asn);
+
+    my $rr_loc = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
+    my $rr_asn = get_ip_asn([ '202.38.64.10', '202.96.196.33' ]);
+    print Dumper($rr_loc, $rr_asn);
+
+=head1 DESCRIPTION
+
+    default ip as data: ftp://routeviews.org/dnszones/originas.bz2
+
+    default ip location data: http://ip.taobao.com
+
+=head1 METHOD
+
+=head2 get_ip_loc
+
+get ip location, with state, prov, isp
+
+返回IP区域信息，包括国家、省份、运营商
+
+    my $r = get_ip_loc('202.38.64.10');
+
+    my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
+
+    # {  
+    # $ip_a => { state => ... , prov => ..., isp => ... }, 
+    # $ip_b => { state => ... , prov => ..., isp => ... }, 
+    # }
+
+=head2 get_ip_asn
+
+get ip asn
+
+返回IP的AS号
+
+    my $r = get_ip_asn('202.38.64.10');
+
+    my $rr = get_ip_asn([ '202.38.64.10', '202.96.196.33' ]);
+
+    # {  
+    # $ip_a => { asn => ... }, 
+    # $ip_b => { asn => ... }, 
+    # }
+
+=head2 get_ip_info
+
+get_ip_info from some json file, see also IPInfo_LOC.json 
+
+给定IP列表，以及json文件，返回json文件提供的IP信息，格式参考IPInfo_LOC.json 
+
+    my $rr = get_ip_info([ '202.38.64.10', '202.96.196.33' ], 
+        ip_info_file => 'some_ipinfo.json', 
+    );
+
+=head1 ATTR
+
+=head2 DEBUG
+
+set $Simple::IPInfo::DEBUG = 1  for more details
+
+=head1 AUTHOR
+
+Abby Pan <abbypan@gmail.com>
+
+=cut
