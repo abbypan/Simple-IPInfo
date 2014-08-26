@@ -68,7 +68,37 @@ get_ip_info from some json file, see also IPInfo_LOC.json
 
     my $rr = get_ip_info([ '202.38.64.10', '202.96.196.33' ], 
         ip_info_file => 'some_ipinfo.json', 
+        use_ip_c => 0, 
     );
+
+=head2 get_ipc_info
+
+get_ipc_info from ip info hash
+
+指定ip，从已知的ip_c段hash中取出对应的信息
+
+    my $r =  get_ipc_info('202.38.64.10', $rr);
+
+=head2  read_table_ipinfo
+
+add ipinfo to arrayref
+
+    use Simple::IPInfo;
+    use Data::Dumper;
+
+    my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
+
+    my $r = read_table_ipinfo(
+        $arr, 
+        0,
+        write_file => '02.read_table_ipinfo.csv', 
+        sep => ',', 
+        charset         => 'utf8',
+        return_arrayref => 1,
+        ipinfo_names    => [qw/state prov isp/],
+    );
+
+    print Dumper($r);
 
 =head1 ATTR
 

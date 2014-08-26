@@ -48,6 +48,10 @@ sub parse_raw_file {
 
         next if ( ! $s_inet or ! $e_inet);
 
+        $data_ref->[1]=~s/省|市//;
+        $data_ref->[1]=~s/(内蒙古|宁夏|新疆|广西|香港).*/$1/;
+        $data_ref->[2]=~s/省|市//;
+
         if (  $s_inet == ( $e + 1 ) and 
             $data_ref->[1] eq $s_state and
             $data_ref->[2] eq $s_prov and 
