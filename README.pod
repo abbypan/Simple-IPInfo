@@ -110,4 +110,6 @@ set $Simple::IPInfo::DEBUG = 1  for more details
 
 Abby Pan <abbypan@gmail.com>
 
+thanks to Gabor Szabo <szabgab@gmail.com>
+
 =cut
