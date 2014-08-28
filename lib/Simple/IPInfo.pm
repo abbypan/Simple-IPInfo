@@ -20,7 +20,7 @@ memoize('read_ipinfo');
 
 our $DEBUG = 0;
 
-our $VERSION=0.03;
+our $VERSION=0.04;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath(__FILE__);
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "IPInfo_LOC.json" );
@@ -39,7 +39,7 @@ our $LOCAL = {
 
 sub read_table_ipinfo {
     my ( $arr, $id, %o ) = @_;
-    $o{ip_info_file} ||= $IPINFO_LOC_F;
+    $o{ipinfo_file} ||= $IPINFO_LOC_F;
     $o{ipinfo_names} ||= [qw/state prov isp/];
 
     #my %ip = map { $_->[$id] => 1 } @$arr;
@@ -49,6 +49,7 @@ sub read_table_ipinfo {
         $arr, %o,
         return_arrayref => 0, 
         write_file=> undef, 
+        write_head => undef, 
         conv_sub => sub {
             my ($r) = @_;
 
@@ -133,7 +134,7 @@ sub get_ip_info {
 
     print "get ip info begin\n" if($DEBUG);
 
-    my $ip_info = read_ipinfo( $opt{ip_info_file} );
+    my $ip_info = read_ipinfo( $opt{ipinfo_file} );
 
     my $n = $#$ip_info;
 
@@ -144,7 +145,7 @@ sub get_ip_info {
 
     for(my $ip_i =0; $ip_i<=$#$ip_list; $ip_i+=$opt{step}+1) {
         my $ip_j = $ip_i + $opt{step} ;
-        print "check $ip_i -> $ip_j\n";
+        print "check ip $ip_i -> $ip_j\n" if($DEBUG);
 
         for my $x (@{$ip_inet}[ $ip_i .. $ip_j ]) {
             my ( $ip, $inet ) = @$x;

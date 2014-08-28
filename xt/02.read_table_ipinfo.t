@@ -8,11 +8,25 @@ my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
 my $r = read_table_ipinfo(
     $arr, 
     0,
-    write_file => '02.read_table_ipinfo.csv', 
+    write_file => '02.read_table_ipinfo_loc.csv', 
     sep => ',', 
     charset         => 'utf8',
     return_arrayref => 1,
     ipinfo_names    => [qw/state prov isp/],
+    write_head => [qw/ip some state prov isp/ ], 
 );
 
+
 print Dumper($r);
+
+my $asn_r = read_table_ipinfo(
+    $arr, 
+    0,
+    write_file => '02.read_table_ipinfo_asn.csv', 
+    sep => ',', 
+    charset         => 'utf8',
+    return_arrayref => 1,
+    ipinfo_file => $Simple::IPInfo::IPINFO_ASN_F,
+    ipinfo_names    => [qw/asn/],
+);
+print Dumper($asn_r);
