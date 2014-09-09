@@ -6,7 +6,7 @@ use FindBin;
 $|=1;
 
 our $DATA_DIR='data';
-exit if(-f "$DATA_DIR/*.temp");
+exit if(glob("$DATA_DIR/*.temp"));
 
 
 my ($i) = @ARGV;
