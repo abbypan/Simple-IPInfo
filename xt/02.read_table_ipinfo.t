@@ -22,11 +22,11 @@ print Dumper($r);
 my $asn_r = read_table_ipinfo(
     $arr, 
     0,
-    write_file => '02.read_table_ipinfo_asn.csv', 
+    write_file => '02.read_table_ipinfo_as.csv', 
     sep => ',', 
     charset         => 'utf8',
     return_arrayref => 1,
-    ipinfo_file => $Simple::IPInfo::IPINFO_ASN_F,
-    ipinfo_names    => [qw/asn/],
+    ipinfo_file => $Simple::IPInfo::IPINFO_AS_F,
+    ipinfo_names    => [qw/as/],
 );
 print Dumper($asn_r);

@@ -4,10 +4,12 @@ require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(
   get_ip_loc
-  get_ip_asn
+  get_ip_as
   get_ip_info
   read_table_ipinfo
   get_ipc_info
+  get_ipinfo_by_curl
+  read_ipinfo
 );
 use utf8;
 use Data::Validate::IP qw/is_ipv4 is_ipv6 is_public_ipv4/;
@@ -20,22 +22,47 @@ memoize('read_ipinfo');
 
 our $DEBUG = 0;
 
-our $VERSION=0.04;
+our $VERSION=0.05;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath(__FILE__);
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "IPInfo_LOC.json" );
-our $IPINFO_ASN_F = File::Spec->catpath( $vol, $dir, "IPInfo_ASN.json" );
+our $IPINFO_AS_F = File::Spec->catpath( $vol, $dir, "IPInfo_AS.json" );
 
 our $UNKNOWN =
-  { state => '未知', prov => '未知', isp => '未知', asn => '未知' };
+  { state => '未知', prov => '未知', isp => '未知', as => '未知' };
 our $ERROR =
-  { state => '无效', prov => '无效', isp => '无效', asn => '无效' };
+  { state => '无效', prov => '无效', isp => '无效', as => '无效' };
 our $LOCAL = {
     state => '局域网',
     prov  => '局域网',
     isp   => '局域网',
-    asn   => '局域网'
+    as   => '局域网'
 };
+
+
+sub get_ipinfo_by_curl {
+    my ($ip) = @_;
+    my $s = `curl -s ipinfo.io/$ip`;
+    my $r = decode_json $s;
+
+    my ($asn, $isp)= $r->{org}=~m#AS(\d+)\s*(.*)#;
+    if($r->{country} eq 'CN'){
+        $isp = $isp=~/\bTelecom\b/ ? '电信' : 
+        $isp=~/\bCNCGROUP\b/ ?  '联通' :
+        $isp=~/\bTieTong\b/ ? '铁通':
+        $isp=~/\bEducation\b/ ? '教育' :
+        $isp=~/\bMobile Communication\b/ ? '移动' : $isp;
+    }
+
+    $r = {
+        ip => $r->{ip}, 
+        loc => $r->{loc}, 
+        country => $r->{country}, 
+        isp => $isp, 
+        as => $asn, 
+    };
+    return $r;
+}
 
 sub read_table_ipinfo {
     my ( $arr, $id, %o ) = @_;
@@ -100,9 +127,9 @@ sub calc_ip_list_inet {
     return \@ip_inet;
 }
 
-sub get_ip_asn {
+sub get_ip_as {
     my ( $ip_list, %opt ) = @_;
-    $opt{ip_info_file} = $IPINFO_ASN_F;
+    $opt{ip_info_file} = $IPINFO_AS_F;
     return get_ip_info( $ip_list, %opt );
 }
 

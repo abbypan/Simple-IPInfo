@@ -1,32 +1,52 @@
 #!/usr/bin/perl
 use Socket;
+use utf8;
+$|=1;
 
 my ($old, $new, $dst) = @ARGV;
 
-open my $fho, '<', $old;
-my $read_fho = sub { <$fho> };
-open my $fhn, '<', $new;
-my $read_fhn = sub { <$fhn> };
-open my $fhw, '>', $dst;
+open my $fho, '<:utf8', $old;
+open my $fhn, '<:utf8', $new;
+open my $fhw, '>:utf8', $dst;
 
-my ($old_n , @old_data) = read_one_line($read_fho);
-my ($new_n , @new_data) = read_one_line($read_fhn);
+my $oc = <$fho>;
+my ($old_n , @old_data) = read_one_line($oc);
+my $nc = <$fhn>;
+my ($new_n , @new_data) = read_one_line($nc);
+my $i=0;
+my $o_f = 0;
+my $n_f = 0;
 while(1){
-    last unless($new_n or $old_n);
+    last if($o_f and $n_f);
+
+    $i++;
+    print "\r$i" if($i % 1000==0);
 
     if(! $old_n or $new_n<$old_n){
         print $fhw join(",", @new_data),"\n";
-        ($new_n , @new_data) = read_one_line($read_fhn);
+        my $nc = <$fhn>;
+        $n_f = 1 unless($nc);
+        ($new_n , @new_data) = read_one_line($nc);
     }elsif(! $new_n or $new_n>$old_n){
         print $fhw join(",", @old_data),"\n";
-        ($old_n , @old_data) = read_one_line($read_fho);
+        my $oc = <$fho>;
+        $o_f = 1 unless($oc);
+        ($old_n , @old_data) = read_one_line($oc);
     }elsif($new_n and $old_n and $new_n==$old_n){
         my @sd = select_data(\@old_data, \@new_data);
         print $fhw join(",", @sd),"\n";
-        ($old_n , @old_data) = read_one_line($read_fho);
-        ($new_n , @new_data) = read_one_line($read_fhn);
+
+        my $oc = <$fho>;
+        $o_f = 1 unless($oc);
+        ($old_n , @old_data) = read_one_line($oc);
+        my $nc = <$fhn>;
+        $n_f = 1 unless($nc);
+        ($new_n , @new_data) = read_one_line($nc);
     }
 }
+close $fhw;
+close $oc;
+close $nc;
 
 sub select_data {
     my ($old, $new) = @_;
@@ -50,17 +70,11 @@ sub select_data {
 }
 
 sub read_one_line {
-    my ($read) = @_;
-
-    my $line = $read->();
-    return unless($line);
+    my ($line) = @_;
     chomp($line);
+    return unless($line);
 
     my @data = split /,/, $line;
-    $data[0]=~s/\.1$/.0/;
-    $data[$_] ||='未知'  for ( 0 .. 3);
-    $data[3]=~s/教育网/教育/g;
-
-    my $n = unpack('N', inet_aton($ip));
+    my $n = unpack('N', inet_aton($data[0]));
     return ($n, @data);
 }

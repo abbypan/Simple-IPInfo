@@ -16,7 +16,7 @@ print Dumper($rr);
 my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
 print Dumper($rr);
 
-my $rr = get_ip_asn([ '202.38.64.10', '202.96.196.33' ]);
+my $rr = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
 print Dumper($rr);
 
 my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ], use_ip_c =>1 );

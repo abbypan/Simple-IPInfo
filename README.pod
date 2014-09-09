@@ -15,11 +15,11 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
     use utf8;
 
     my $r_loc = get_ip_loc('202.38.64.10');
-    my $r_asn = get_ip_asn('202.38.64.10');
+    my $r_asn = get_ip_as('202.38.64.10');
     print Dumper($r_loc,$r_asn);
 
     my $rr_loc = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
-    my $rr_asn = get_ip_asn([ '202.38.64.10', '202.96.196.33' ]);
+    my $rr_asn = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
     print Dumper($rr_loc, $rr_asn);
 
 =head1 DESCRIPTION
@@ -45,19 +45,19 @@ get ip location, with state, prov, isp
     # $ip_b => { state => ... , prov => ..., isp => ... }, 
     # }
 
-=head2 get_ip_asn
+=head2 get_ip_as
 
-get ip asn
+get ip as number
 
 返回IP的AS号
 
-    my $r = get_ip_asn('202.38.64.10');
+    my $r = get_ip_as('202.38.64.10');
 
-    my $rr = get_ip_asn([ '202.38.64.10', '202.96.196.33' ]);
+    my $rr = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
 
     # {  
-    # $ip_a => { asn => ... }, 
-    # $ip_b => { asn => ... }, 
+    # $ip_a => { as => ... }, 
+    # $ip_b => { as => ... }, 
     # }
 
 =head2 get_ip_info
@@ -103,20 +103,82 @@ add ipinfo to arrayref
     my $asn_r = read_table_ipinfo(
         $arr, 
         0,
-        write_file => '02.read_table_ipinfo_asn.csv', 
+        write_file => '02.read_table_ipinfo_as.csv', 
         sep => ',', 
         charset         => 'utf8',
         return_arrayref => 1,
-        ipinfo_file => $Simple::IPInfo::IPINFO_ASN_F,
-        ipinfo_names    => [qw/asn/],
+        ipinfo_file => $Simple::IPInfo::IPINFO_AS_F,
+        ipinfo_names    => [qw/as/],
     );
     print Dumper($asn_r);
+
+=head2 get_ipinfo_by_curl
+
+ip info is from http://ipinfo.io
+
+get ip location, with loc, country, isp, as number
+
+返回IP区域信息，包括地理位置、国家、运营商、AS号
+
+    my $r = get_ipinfo_by_curl('202.38.64.10');
+    
+    print Dumper($r);
 
 =head1 ATTR
 
 =head2 DEBUG
 
 set $Simple::IPInfo::DEBUG = 1  for more details
+
+=head1 BIN
+
+    system need install curl、bunzip2、tar
+
+=head2 get ip as data from routeviews.org
+    
+    1) get as data and parse it
+
+    perl parse_ip_as.pl 
+
+    2)  write as json file
+
+    perl write_ip_as.pl
+
+=head2 get ip loc from taobao
+
+    1) init data dir, and null csv file
+
+    perl init_ip_loc.pl
+
+    2) add ask_ip_loc.pl to crontab, for example
+
+    */5 * * * * cd ip_loc_taobao/bin && perl ask_ip_loc.pl >/dev/null 2>&1
+    
+    3) merge data/*.csv, get main tidy csv
+
+    perl merge_ip_loc.pl
+
+    perl tidy_ip_loc.pl ip_loc_taobao.csv ip_loc_new.csv
+
+    4) compare with ip_loc_old.csv
+
+    perl compare_ip_loc.pl  ip_loc_old.csv ip_loc_new.csv  ip_loc_merge.csv
+
+    5) fix cn ip loc
+
+    perl fix_cn_ip_loc.pl ip_loc_merge.csv  fix_cn_ip_loc.csv
+
+    6) merge with fix_cn data
+
+    perl compare_ip_loc.pl ip_loc_merge.csv fix_cn_ip_loc.csv ip_loc.csv
+
+    7) parse ip_loc.csv, map ipc to inet range
+
+    perl parse_ip_loc.pl ip_loc.csv ip_loc_inet.csv
+
+    8) write ip_loc_inet.csv into json 
+
+    perl write_ip_loc.pl ip_loc_inet.csv IPInfo_LOC.json
 
 =head1 AUTHOR
 

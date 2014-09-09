@@ -3,26 +3,11 @@
 use Net::CIDR qw/cidr2range/;
 use Socket qw/inet_aton/;
 use SimpleR::Reshape;
-use JSON;
 
+system("curl ftp://routeviews.org/dnszones/originas.bz2 -o originas.bz2");
+system("bunzip2 originas.bz2");
 parse_raw_file("originas", "originas.temp");
 parse_raw_file('originas.temp', 'originas.csv');
-
-#rember edit originas.csv, delete error line
-#write_asn_json( 'originas.csv', 'IPInfo_ASN.json' );
-
-sub write_asn_json {
-    my ( $src, $dst ) = @_;
-
-    my $d = read_table( $src, sep => ',' );
-    my @data =
-      map { { inet_s => $_->[0], inet_e => $_->[1], asn => $_->[2] } } @$d;
-    my $s = to_json( \@data );
-    $s =~ s/},{/},\n{/sg;
-    open my $fh, '>', $dst;
-    print $fh $s;
-    close $fh;
-}
 
 sub parse_raw_file {
     my ( $raw, $temp ) = @_;
