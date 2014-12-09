@@ -4,6 +4,8 @@ Release history for Perl module Simple::IPInfo
     - Added this Changes file
     - Added "use 5.008", since the module uses utf8, and added the
       requirement to the metadata as well.
+    - Added "use strict" and "use warnings", plus minor tweaks so it
+      will run without warnings.
 
 0.05 2014-09-09 ABBYPAN
     - remove ^M

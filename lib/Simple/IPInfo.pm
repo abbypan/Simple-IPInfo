@@ -2,9 +2,10 @@
 package Simple::IPInfo;
 
 use 5.008;
-require Exporter;
-@ISA    = qw(Exporter);
-@EXPORT = qw(
+use strict;
+use warnings;
+use parent 'Exporter';
+our @EXPORT = qw(
   get_ip_loc
   get_ip_as
   get_ip_info
