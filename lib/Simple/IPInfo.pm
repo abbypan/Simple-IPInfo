@@ -1,5 +1,7 @@
 # ABSTRACT: Get IP/IPList Info (location, as number, etc)
 package Simple::IPInfo;
+
+use 5.008;
 require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(
