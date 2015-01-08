@@ -22,7 +22,7 @@ memoize('read_ipinfo');
 
 our $DEBUG = 0;
 
-our $VERSION=0.05;
+our $VERSION=0.06;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath(__FILE__);
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "IPInfo_LOC.json" );

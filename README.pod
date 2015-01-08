@@ -28,6 +28,19 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
 
     default ip location data: http://ip.taobao.com
 
+=head1 TOOL
+
+=head2 add_ip_info.pl
+
+    perl add_ip_info.pl -f xt/02.ip.csv -d xt/02.ip.csv.log -i 0 -t loc -H 1
+
+    f : source file 源文件
+    d : dest file 目标文件
+    i : ip is in cloumn x, ip在第x列
+    H : skip head or not，default is 0 (not skip) 默认不跳过首行
+    t : loc or as, default is loc；添加信息类型，默认是加loc信息，也可指定为as
+    s : sep character, default is ',' 默认分隔符为逗号
+
 =head1 METHOD
 
 =head2 get_ip_loc
@@ -130,7 +143,7 @@ get ip location, with loc, country, isp, as number
 
 set $Simple::IPInfo::DEBUG = 1  for more details
 
-=head1 BIN
+=head1 XBIN
 
     system need install curl、bunzip2、tar
 
@@ -162,7 +175,12 @@ set $Simple::IPInfo::DEBUG = 1  for more details
 
     4) compare with ip_loc_old.csv
 
-    perl compare_ip_loc.pl  ip_loc_old.csv ip_loc_new.csv  ip_loc_merge.csv
+    #按inet顺序
+    perl sort_ip_loc.pl ip_loc_old.csv ip_loc_old_sort.csv
+
+    perl tidy_ip_loc.pl ip_loc_old_sort.csv ip_loc_old_tidy.csv
+
+    perl compare_ip_loc.pl  ip_loc_old_tidy.csv ip_loc_new.csv  ip_loc_merge.csv
 
     5) fix cn ip loc
 
