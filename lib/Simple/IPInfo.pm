@@ -1,8 +1,11 @@
 # ABSTRACT: Get IP/IPList Info (location, as number, etc)
 package Simple::IPInfo;
-require Exporter;
-@ISA    = qw(Exporter);
-@EXPORT = qw(
+
+use 5.008;
+use strict;
+use warnings;
+use parent 'Exporter';
+our @EXPORT = qw(
   get_ip_loc
   get_ip_as
   get_ip_info
