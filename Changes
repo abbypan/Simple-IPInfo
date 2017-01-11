@@ -1,5 +1,8 @@
 Release history for Perl module Simple::IPInfo
 
+0.07 2017-01-12 ABBYPAN
+    - ipinfo files : use csv, not json
+
 0.06 2014-12-?? ABBYPAN
     - Added this Changes file
     - Added "use 5.008", since the module uses utf8, and added the
