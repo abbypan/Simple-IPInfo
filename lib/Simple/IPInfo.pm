@@ -5,10 +5,11 @@ require Exporter;
 @EXPORT = qw(
   get_ip_loc
   get_ip_as
-  get_ip_info
-  read_table_ipinfo
+  get_ipinfo
   get_ipc_info
-  get_ipinfo_by_curl
+  get_ipinfo_io
+
+  append_table_ipinfo
   read_ipinfo
 );
 use utf8;
@@ -22,7 +23,7 @@ memoize('read_ipinfo');
 
 our $DEBUG = 0;
 
-our $VERSION=0.07;
+our $VERSION=0.08;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath(__FILE__);
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "IPInfo_LOC.csv" );
@@ -40,7 +41,7 @@ our $LOCAL = {
 };
 
 
-sub get_ipinfo_by_curl {
+sub get_ipinfo_io {
     my ($ip) = @_;
     my $s = `curl -s ipinfo.io/$ip/json`;
     my $r = decode_json $s;
@@ -64,7 +65,7 @@ sub get_ipinfo_by_curl {
     return $r;
 }
 
-sub read_table_ipinfo {
+sub append_table_ipinfo {
     my ( $arr, $id, %o ) = @_;
     $o{ipinfo_file} ||= $IPINFO_LOC_F;
     $o{ipinfo_names} ||= [qw/state prov isp/];
@@ -88,7 +89,7 @@ sub read_table_ipinfo {
         }
     );
 
-    my $ip_info = get_ip_info([ keys %ip_c ], %o);
+    my $ip_info = get_ipinfo([ keys %ip_c ], %o);
     read_table(
         $arr, %o,
         conv_sub => sub {
@@ -131,14 +132,14 @@ sub calc_ip_list_inet {
 
 sub get_ip_as {
     my ( $ip_list, %opt ) = @_;
-    $opt{ip_info_file} = $IPINFO_AS_F;
-    return get_ip_info( $ip_list, %opt );
+    $opt{ipinfo_file} = $IPINFO_AS_F;
+    return get_ipinfo( $ip_list, %opt );
 }
 
 sub get_ip_loc {
     my ( $ip_list, %opt ) = @_;
-    $opt{ip_info_file} = $IPINFO_LOC_F;
-    return get_ip_info( $ip_list, %opt );
+    $opt{ipinfo_file} = $IPINFO_LOC_F;
+    return get_ipinfo( $ip_list, %opt );
 }
 
 sub get_ipc_info {
@@ -148,7 +149,7 @@ sub get_ipc_info {
     return $info->{$ip_c};
 }
 
-sub get_ip_info {
+sub get_ipinfo {
 
     # large amount ip can use this function
     # ip array ref => ( ip => { state,prov,area,isp } )

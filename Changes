@@ -1,5 +1,8 @@
 Release history for Perl module Simple::IPInfo
 
+0.08 2017-01-12 ABBYPAN
+    - change sub name: get_ipinfo, append_table_ipinfo, get_ipinfo_io
+
 0.07 2017-01-12 ABBYPAN
     - ipinfo files : use csv, not json
 

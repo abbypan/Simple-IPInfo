@@ -15,7 +15,7 @@ $opt{H} //= 0;
 $opt{type} =  ($opt{t} and $opt{t} eq 'as') ? $Simple::IPInfo::IPINFO_AS_F : $Simple::IPInfo::IPINFO_LOC_F;
 $opt{names} = ($opt{t} and $opt{t} eq 'as') ? [ 'as' ] : [ qw/state prov isp/ ];
 
-read_table_ipinfo(
+append_table_ipinfo(
     $opt{f}, 
     $opt{i},
     write_file => $opt{d}, 

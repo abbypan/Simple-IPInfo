@@ -6,7 +6,7 @@
 
 Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
 
-给定单个IP或IP列表，查对应的区域信息，或AS号
+给定IP列表，查对应的区域信息，或AS号
 
 =head1 SYNOPSIS
 
@@ -14,19 +14,20 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
     use Data::Dumper;
     use utf8;
 
-    my $r_loc = get_ip_loc('202.38.64.10');
-    my $r_asn = get_ip_as('202.38.64.10');
-    print Dumper($r_loc,$r_asn);
-
     my $rr_loc = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
     my $rr_asn = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
     print Dumper($rr_loc, $rr_asn);
+
+    my $r_json = get_ipinfo_io('202.38.64.10');
+    print Dumper($r_json);
 
 =head1 DESCRIPTION
 
     default ip as data: ftp://routeviews.org/dnszones/originas.bz2
 
     default ip location data: http://ip.taobao.com
+
+    online ip api: http://ipinfo.io
 
 =head1 TOOL
 
@@ -49,8 +50,6 @@ get ip location, with state, prov, isp
 
 返回IP区域信息，包括国家、省份、运营商
 
-    my $r = get_ip_loc('202.38.64.10');
-
     my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
 
     # {  
@@ -64,8 +63,6 @@ get ip as number
 
 返回IP的AS号
 
-    my $r = get_ip_as('202.38.64.10');
-
     my $rr = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
 
     # {  
@@ -73,13 +70,13 @@ get ip as number
     # $ip_b => { as => ... }, 
     # }
 
-=head2 get_ip_info
+=head2 get_ipinfo
 
-get_ip_info from some csv file, see also IPInfo_LOC.csv
+get_ipinfo from some csv file, see also IPInfo_LOC.csv
 
 给定IP列表，以及csv文件，返回csv文件提供的IP信息，格式参考IPInfo_LOC.csv
 
-    my $rr = get_ip_info([ '202.38.64.10', '202.96.196.33' ], 
+    my $rr = get_ipinfo([ '202.38.64.10', '202.96.196.33' ], 
         ip_info_file => 'some_ipinfo.csv', 
         use_ip_c => 0, 
     );
@@ -92,7 +89,7 @@ get_ipc_info from ip info hash
 
     my $r =  get_ipc_info('202.38.64.10', $rr);
 
-=head2  read_table_ipinfo
+=head2  append_table_ipinfo
 
 add ipinfo to arrayref
 
@@ -101,7 +98,7 @@ add ipinfo to arrayref
 
     my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
 
-    my $r = read_table_ipinfo(
+    my $r = append_table_ipinfo(
         $arr, 
         0,
         write_file => '02.read_table_ipinfo_loc.csv', 
@@ -113,7 +110,7 @@ add ipinfo to arrayref
     );
     print Dumper($r);
 
-    my $asn_r = read_table_ipinfo(
+    my $asn_r = append_table_ipinfo(
         $arr, 
         0,
         write_file => '02.read_table_ipinfo_as.csv', 
@@ -125,7 +122,7 @@ add ipinfo to arrayref
     );
     print Dumper($asn_r);
 
-=head2 get_ipinfo_by_curl
+=head2 get_ipinfo_io
 
 ip info is from http://ipinfo.io
 
@@ -133,7 +130,7 @@ get ip location, with loc, country, isp, as number
 
 返回IP区域信息，包括地理位置、国家、运营商、AS号
 
-    my $r = get_ipinfo_by_curl('202.38.64.10');
+    my $r = get_ipinfo_io('202.38.64.10');
     
     print Dumper($r);
 
