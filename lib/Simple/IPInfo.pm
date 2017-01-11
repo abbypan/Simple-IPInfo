@@ -1,11 +1,8 @@
 # ABSTRACT: Get IP/IPList Info (location, as number, etc)
 package Simple::IPInfo;
-
-use 5.008;
-use strict;
-use warnings;
-use parent 'Exporter';
-our @EXPORT = qw(
+require Exporter;
+@ISA    = qw(Exporter);
+@EXPORT = qw(
   get_ip_loc
   get_ip_as
   get_ip_info
@@ -17,19 +14,19 @@ our @EXPORT = qw(
 use utf8;
 use Data::Validate::IP qw/is_ipv4 is_ipv6 is_public_ipv4/;
 use SimpleR::Reshape;
-use File::Spec;
 use JSON;
+use File::Spec;
 use Memoize;
 use Socket qw/inet_aton/;
 memoize('read_ipinfo');
 
 our $DEBUG = 0;
 
-our $VERSION=0.06;
+our $VERSION=0.07;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath(__FILE__);
-our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "IPInfo_LOC.json" );
-our $IPINFO_AS_F = File::Spec->catpath( $vol, $dir, "IPInfo_AS.json" );
+our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "IPInfo_LOC.csv" );
+our $IPINFO_AS_F = File::Spec->catpath( $vol, $dir, "IPInfo_AS.csv" );
 
 our $UNKNOWN =
   { state => '未知', prov => '未知', isp => '未知', as => '未知' };
@@ -45,7 +42,7 @@ our $LOCAL = {
 
 sub get_ipinfo_by_curl {
     my ($ip) = @_;
-    my $s = `curl -s ipinfo.io/$ip`;
+    my $s = `curl -s ipinfo.io/$ip/json`;
     my $r = decode_json $s;
 
     my ($asn, $isp)= $r->{org}=~m#AS(\d+)\s*(.*)#;
@@ -99,6 +96,8 @@ sub read_table_ipinfo {
 
             my $ip = $r->[$id];
             $ip=~s/\.\d+$/.0/;
+
+            $ip_info->{$ip}{$_} ||='未知' for @{ $o{ipinfo_names} };
 
             [ @$r, @{ $ip_info->{ $ip } }{ @{ $o{ipinfo_names} } } ];
         }
@@ -212,12 +211,19 @@ sub read_ipinfo {
     $f ||= $IPINFO_LOC_F;
     $charset ||= 'utf8';
 
-    local $/;
+    #local $/;
+    my @d;
     open my $fh, "<:$charset", $f;
-    my $c = <$fh>;
+    chomp(my $h = <$fh>);
+    my @head = split /,/, $h;
+    while(my $c=<$fh>){
+        chomp($c);
+        my @line = split /,/, $c;
+        my %k = map { $head[$_] => $line[$_] } ( 0 .. $#head );
+        push @d, \%k;
+    }
     close $fh;
-
-    return from_json($c);
+    return \@d;
 }
 
 sub is_ip {

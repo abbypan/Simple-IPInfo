@@ -75,12 +75,12 @@ get ip as number
 
 =head2 get_ip_info
 
-get_ip_info from some json file, see also IPInfo_LOC.json 
+get_ip_info from some csv file, see also IPInfo_LOC.csv
 
-给定IP列表，以及json文件，返回json文件提供的IP信息，格式参考IPInfo_LOC.json 
+给定IP列表，以及csv文件，返回csv文件提供的IP信息，格式参考IPInfo_LOC.csv
 
     my $rr = get_ip_info([ '202.38.64.10', '202.96.196.33' ], 
-        ip_info_file => 'some_ipinfo.json', 
+        ip_info_file => 'some_ipinfo.csv', 
         use_ip_c => 0, 
     );
 
@@ -149,13 +149,9 @@ set $Simple::IPInfo::DEBUG = 1  for more details
 
 =head2 get ip as data from routeviews.org
     
-    1) get as data and parse it
-
     perl parse_ip_as.pl 
 
-    2)  write as json file
-
-    perl write_ip_as.pl
+    mv originas.csv IPInfo_AS.csv
 
 =head2 get ip loc from taobao
 
@@ -167,36 +163,38 @@ set $Simple::IPInfo::DEBUG = 1  for more details
 
     */5 * * * * cd ip_loc_taobao/bin && perl ask_ip_loc.pl >/dev/null 2>&1
     
-    3) merge data/*.csv, get main tidy csv
+    3) merge data/*.csv to ip_loc_taobao.csv , get main tidy csv
 
     perl merge_ip_loc.pl
 
-    perl tidy_ip_loc.pl ip_loc_taobao.csv ip_loc_new.csv
+    perl tidy_ip_loc.pl ip_loc_taobao.csv ip_loc_taobao.tidy.csv
 
     4) compare with ip_loc_old.csv
 
     #按inet顺序
-    perl sort_ip_loc.pl ip_loc_old.csv ip_loc_old_sort.csv
+    perl sort_ip_loc.pl ip_loc_old.csv ip_loc_old.sort.csv
 
-    perl tidy_ip_loc.pl ip_loc_old_sort.csv ip_loc_old_tidy.csv
+    perl tidy_ip_loc.pl ip_loc_old.sort.csv ip_loc_old.tidy.csv
 
-    perl compare_ip_loc.pl  ip_loc_old_tidy.csv ip_loc_new.csv  ip_loc_merge.csv
+    perl compare_ip_loc.pl  ip_loc_old.tidy.csv ip_loc_taobao.tidy.csv  ip_loc_compare.csv
 
-    5) fix cn ip loc
+    5) fix cn ip loc, guess by same as number
 
-    perl fix_cn_ip_loc.pl ip_loc_merge.csv  fix_cn_ip_loc.csv
+    perl fix_ip_loc.pl ip_loc_compare.csv  ip_loc_fix.csv
 
     6) merge with fix_cn data
 
-    perl compare_ip_loc.pl ip_loc_merge.csv fix_cn_ip_loc.csv ip_loc.csv
+    perl compare_ip_loc.pl ip_loc_compare.csv ip_loc_fix.csv ip_loc.csv
 
     7) parse ip_loc.csv, map ipc to inet range
 
     perl parse_ip_loc.pl ip_loc.csv ip_loc_inet.csv
 
-    8) write ip_loc_inet.csv into json 
+    mv ip_loc_inet.csv IPInfo_LOC.csv
 
-    perl write_ip_loc.pl ip_loc_inet.csv IPInfo_LOC.json
+    9) rename ip_loc.csv to old
+
+    mv ip_loc.csv ip_loc_old.tidy.csv
 
 =head1 AUTHOR
 

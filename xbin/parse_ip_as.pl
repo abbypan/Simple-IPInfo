@@ -16,6 +16,7 @@ sub parse_raw_file {
     open my $fhw, '>', $temp;
     while (<$fh>) {
         my ( $s_inet, $e_inet, $asn ) = extract_asn_line($_);
+        next unless($s_inet=~/^\d+$/ and $e_inet=~/^\d+$/ and $asn=~/^\d+$/);
         next if ( $e_inet == $e );
         if ( $n == $asn and $s_inet == ( $e + 1 ) ) {
             $e = $e_inet;
@@ -31,6 +32,7 @@ sub parse_raw_file {
 
     my $d = read_table( $temp, sep => ',', return_arrayref => 1 );
     $d = [ sort { $a->[0] <=> $b->[0] } @$d ];
+    unshift @$d, [ qw/s e as/ ];
     write_table( $d, file => $temp, sep => ',' );
     return $temp;
 }

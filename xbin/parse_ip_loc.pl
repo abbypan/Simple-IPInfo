@@ -15,6 +15,7 @@ sub map_ipc_to_inet {
     open my $fh,  '<', $raw;
     open my $fhw, '>', $dst;
     $fhw->autoflush(1);
+    print $fhw "s,e,state,prov,isp\n";
 
     my $all_lines   = 0;
     my $merge_lines = 0;
@@ -34,7 +35,7 @@ sub map_ipc_to_inet {
             $merge_lines++;
         }
         else {
-            print $fhw "$s,$e,$s_state,$s_prov,$s_isp\n" if($s<$e);
+            print $fhw "$s,$e,$s_state,$s_prov,$s_isp\n";
             ( $s, $e, $s_state, $s_prov, $s_isp ) =
               ( $s_inet, $e_inet, $n_state, $n_prov, $n_isp );
             $merge_lines = 0;
