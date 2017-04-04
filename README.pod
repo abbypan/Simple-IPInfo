@@ -42,6 +42,39 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
     t : loc or as, default is loc；添加信息类型，默认是加loc信息，也可指定为as
     s : sep character, default is ',' 默认分隔符为逗号
 
+=head2 make_inet_from_cidr.pl
+
+make_inet_from_cidr.pl [src_file] [dst_file]
+
+    $ pip install csvkit
+    $ cd xt/data/
+
+    $ csvcut -c network,isp,autonomous_system_number isp_cidr.csv > isp_cidr.csv.cut
+    $ make_inet_from_cidr.pl isp_cidr.csv.cut isp_inet.csv
+
+    $ csvcut -c network,geoname_id city_blocks_ipv4.csv > city_blocks_ipv4.csv.cut
+    $ csvcut -c geoname_id,country_iso_code,subdivision_1_iso_code,country_name,subdivision_1_name city_locations_zh-CN.csv > city_locations_zh-CN.csv.cut
+    $ csvjoin -c geoname_id city_blocks_ipv4.csv.cut city_locations_zh-CN.csv.cut |csvcut -C geoname_id > city_cidr.csv
+    $ make_inet_from_cidr.pl city_cidr.csv city_inet.csv
+
+=head2 refine_inet.pl
+
+refine_inet.pl [src_file] [dst_file]
+
+src_file's inet is sorted by csvsort
+
+    $ csvsort isp_inet.csv > isp_inet.csv.sort
+    $ refine_inet.pl isp_inet.csv.sort isp_inet.csv.sort.refine
+
+    $ csvsort city_inet.csv > city_inet.csv.sort
+    $ refine_inet.pl city_inet.csv.sort city_inet.csv.sort.refine
+
+=head2 merge_inet.pl 
+
+merge_inet.pl [src_inet_file1] [src_inet_file2] [dst_merge_file]
+
+    $ merge_inet.pl city_inet.csv.sort.refine isp_inet.csv.sort.refine merge_city_isp_inet.csv
+
 =head1 METHOD
 
 =head2 get_ip_loc
