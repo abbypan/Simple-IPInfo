@@ -18,16 +18,11 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
     my $rr_asn = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
     print Dumper($rr_loc, $rr_asn);
 
-    my $r_json = get_ipinfo_io('202.38.64.10');
-    print Dumper($r_json);
-
 =head1 DESCRIPTION
 
     default ip as data: ftp://routeviews.org/dnszones/originas.bz2
 
     default ip location data: http://ip.taobao.com
-
-    online ip api: http://ipinfo.io
 
 =head1 TOOL
 
