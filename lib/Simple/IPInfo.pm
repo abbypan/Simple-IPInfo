@@ -7,7 +7,6 @@ require Exporter;
   get_ip_as
   get_ipinfo
   get_ipc_info
-  get_ipinfo_io
 
   append_table_ipinfo
   read_ipinfo
@@ -26,49 +25,18 @@ our $DEBUG = 0;
 our $VERSION=0.08;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath(__FILE__);
-our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "IPInfo_LOC.csv" );
-our $IPINFO_AS_F = File::Spec->catpath( $vol, $dir, "IPInfo_AS.csv" );
+our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "inet_loc.csv" );
+our $IPINFO_AS_F = File::Spec->catpath( $vol, $dir, "inet_as.csv" );
 
-our $UNKNOWN =
-  { state => '未知', prov => '未知', isp => '未知', as => '未知' };
-our $ERROR =
-  { state => '无效', prov => '无效', isp => '无效', as => '无效' };
-our $LOCAL = {
-    state => '局域网',
-    prov  => '局域网',
-    isp   => '局域网',
-    as   => '局域网'
-};
-
-
-sub get_ipinfo_io {
-    my ($ip) = @_;
-    my $s = `curl -s ipinfo.io/$ip/json`;
-    my $r = decode_json $s;
-
-    my ($asn, $isp)= $r->{org}=~m#AS(\d+)\s*(.*)#;
-    if($r->{country} eq 'CN'){
-        $isp = $isp=~/\bTelecom\b/ ? '电信' : 
-        $isp=~/\bCNCGROUP\b/ ?  '联通' :
-        $isp=~/\bTieTong\b/ ? '铁通':
-        $isp=~/\bEducation\b/ ? '教育' :
-        $isp=~/\bMobile Communication\b/ ? '移动' : $isp;
-    }
-
-    $r = {
-        ip => $r->{ip}, 
-        loc => $r->{loc}, 
-        country => $r->{country}, 
-        isp => $isp, 
-        as => $asn, 
-    };
-    return $r;
-}
+my @key = qw/country prov isp country_code prov_code isp_code as/;
+our %UNKNOWN = map { $_ => '' } @key;
+our %ERROR = map { $_ => 'error' } @key;
+our %LOCAL = map { $_   => 'local' } @key;
 
 sub append_table_ipinfo {
     my ( $arr, $id, %o ) = @_;
     $o{ipinfo_file} ||= $IPINFO_LOC_F;
-    $o{ipinfo_names} ||= [qw/state prov isp/];
+    $o{ipinfo_names} ||= [qw/country prov isp country_code prov_code isp_code/];
 
     #my %ip = map { $_->[$id] => 1 } @$arr;
     #my $loc = get_ip_loc( [ keys %ip ], %o );
@@ -105,7 +73,6 @@ sub append_table_ipinfo {
     );
 }
 
-
 sub calc_ip_inet {
     my ($ip) = @_;
     my $n = unpack( "N", inet_aton($ip) );
@@ -122,8 +89,8 @@ sub calc_ip_list_inet {
     my @ip_inet = sort { $a->[1] <=> $b->[1] } map {
         [
             $_,
-            ( not is_ip($_) )          ? $ERROR
-            : ( not is_public_ip($_) ) ? $LOCAL
+            ( not is_ip($_) )          ? \%ERROR
+            : ( not is_public_ip($_) ) ? \%LOCAL
             :                            calc_ip_inet($_)
         ]
     } @uniq_ip_list;
@@ -152,7 +119,7 @@ sub get_ipc_info {
 sub get_ipinfo {
 
     # large amount ip can use this function
-    # ip array ref => ( ip => { state,prov,area,isp } )
+    # ip array ref => ( ip => { country,prov,isp,country_code,prov_code,isp_code } )
     my ( $ip_list, %opt ) = @_;
     $opt{step} ||= $#$ip_list;
 
@@ -186,7 +153,7 @@ sub get_ipinfo {
                 next;
             }
             elsif ( $inet < $s or $i > $n ) {
-                $result{$ip} = $UNKNOWN;
+                $result{$ip} = \%UNKNOWN;
                 next;
             }
 

@@ -79,15 +79,15 @@ merge_inet.pl [src_inet_file1] [src_inet_file2] [dst_merge_file]
 
 =head2 get_ip_loc
 
-get ip location, with state, prov, isp
+get ip location, with country, prov, isp
 
 返回IP区域信息，包括国家、省份、运营商
 
     my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
 
     # {  
-    # $ip_a => { state => ... , prov => ..., isp => ... }, 
-    # $ip_b => { state => ... , prov => ..., isp => ... }, 
+    # $ip_a => { country => ... , prov => ..., isp => ... }, 
+    # $ip_b => { country => ... , prov => ..., isp => ... }, 
     # }
 
 =head2 get_ip_as
@@ -138,8 +138,8 @@ add ipinfo to arrayref
         sep => ',', 
         charset         => 'utf8',
         return_arrayref => 1,
-        ipinfo_names    => [qw/state prov isp/],
-        write_head => [qw/ip some state prov isp/ ], 
+        ipinfo_names    => [qw/country prov isp/],
+        write_head => [qw/ip some country prov isp/ ], 
     );
     print Dumper($r);
 
@@ -181,7 +181,7 @@ set $Simple::IPInfo::DEBUG = 1  for more details
     
     perl parse_ip_as.pl 
 
-    mv originas.csv IPInfo_AS.csv
+    mv originas.csv inet_as.csv
 
 =head2 get ip loc from taobao
 
@@ -220,11 +220,25 @@ set $Simple::IPInfo::DEBUG = 1  for more details
 
     perl parse_ip_loc.pl ip_loc.csv ip_loc_inet.csv
 
-    mv ip_loc_inet.csv IPInfo_LOC.csv
+    mv ip_loc_inet.csv inet_loc_src.csv
 
     9) rename ip_loc.csv to old
 
     mv ip_loc.csv ip_loc_old.tidy.csv
+
+=head2 add iso_3166 code for inet_loc_src.csv
+
+use merge_file.pl from SimpleR::Reshape 
+
+inet_loc_src.csv : s, e , country, prov, isp 
+
+inet_loc.csv : s, e , country, prov, isp , country_code, prov_code, isp_code
+
+    merge_file.pl -f country.csv -k 1 -v 0 -F inet_loc_src.csv -K 2 -o inet_loc.csv.c
+    merge_file.pl -f country_prov.csv -k 0,3 -v 1 -F inet_loc.csv.c -K 5,3 -o inet_loc.csv.p
+    merge_file.pl -f country_isp.csv -k 0,3 -v 1 -F inet_loc.csv.p -K 5,4 -o inet_loc.csv
+    rm inet_loc.csv.c
+    rm inet_loc.csv.p
 
 =head1 AUTHOR
 

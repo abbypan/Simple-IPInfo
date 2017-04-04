@@ -13,7 +13,7 @@ $opt{i} //= 0;
 $opt{s} //= ',';
 $opt{H} //= 0; 
 $opt{type} =  ($opt{t} and $opt{t} eq 'as') ? $Simple::IPInfo::IPINFO_AS_F : $Simple::IPInfo::IPINFO_LOC_F;
-$opt{names} = ($opt{t} and $opt{t} eq 'as') ? [ 'as' ] : [ qw/state prov isp/ ];
+$opt{names} = ($opt{t} and $opt{t} eq 'as') ? [ 'as' ] : [ qw/country prov isp/ ];
 
 append_table_ipinfo(
     $opt{f}, 
