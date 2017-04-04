@@ -79,15 +79,15 @@ merge_inet.pl [src_inet_file1] [src_inet_file2] [dst_merge_file]
 
 =head2 get_ip_loc
 
-get ip location, with country, prov, isp
+get ip location, with country, prov, isp, country_code, prov_code, isp_code
 
-返回IP区域信息，包括国家、省份、运营商
+返回IP区域信息，包括国家、省份、运营商，及其英文iso3166编号
 
     my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
 
     # {  
-    # $ip_a => { country => ... , prov => ..., isp => ... }, 
-    # $ip_b => { country => ... , prov => ..., isp => ... }, 
+    # $ip_a => { country => ... , prov => ..., isp => ..., country_code => ..., prov_code => ..., isp_code => ... }, 
+    # ...
     # }
 
 =head2 get_ip_as

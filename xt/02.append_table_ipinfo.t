@@ -12,8 +12,8 @@ my $r = append_table_ipinfo(
     sep => ',', 
     charset         => 'utf8',
     return_arrayref => 1,
-    ipinfo_names    => [qw/country prov isp/],
-    write_head => [qw/ip some country prov isp/ ], 
+    ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
+    write_head => [qw/ip some country prov isp country_code prov_code isp_code/ ], 
 );
 
 

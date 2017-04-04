@@ -22,7 +22,7 @@ memoize('read_ipinfo');
 
 our $DEBUG = 0;
 
-our $VERSION=0.08;
+our $VERSION=0.09;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath(__FILE__);
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "inet_loc.csv" );
@@ -66,7 +66,7 @@ sub append_table_ipinfo {
             my $ip = $r->[$id];
             $ip=~s/\.\d+$/.0/;
 
-            $ip_info->{$ip}{$_} ||='未知' for @{ $o{ipinfo_names} };
+            $ip_info->{$ip}{$_} ||='' for @{ $o{ipinfo_names} };
 
             [ @$r, @{ $ip_info->{ $ip } }{ @{ $o{ipinfo_names} } } ];
         }
