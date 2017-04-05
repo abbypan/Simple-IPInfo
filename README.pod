@@ -24,7 +24,93 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
 
     default ip location data: http://ip.taobao.com
 
-=head1 TOOL
+=head1 METHOD
+
+=head2 get_ip_loc
+
+get ip location, with country, prov, isp, country_code, prov_code, isp_code
+
+返回IP区域信息，包括国家、省份、运营商，及其英文iso3166编号
+
+    my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
+
+    # {  
+    # $ip_a => { country => ... , prov => ..., isp => ..., country_code => ..., prov_code => ..., isp_code => ... }, 
+    # ...
+    # }
+
+=head2 get_ip_as
+
+get ip as number
+
+返回IP的AS号
+
+    my $rr = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
+
+    # {  
+    # $ip_a => { as => ... }, 
+    # $ip_b => { as => ... }, 
+    # }
+
+=head2 get_ipinfo
+
+get_ipinfo from some csv file, see also inet_loc.csv
+
+给定IP列表，以及csv文件，返回csv文件提供的IP信息，格式参考inet_loc.csv
+
+    my $rr = get_ipinfo([ '202.38.64.10', '202.96.196.33' ], 
+        ip_info_file => 'some_ipinfo.csv', 
+        use_ip_c => 0, 
+    );
+
+=head2 get_ipc_info
+
+get_ipc_info from ip info hash
+
+指定ip，从已知的ip_c段hash中取出对应的信息
+
+    my $r =  get_ipc_info('202.38.64.10', $rr);
+
+=head2  append_table_ipinfo
+
+add ipinfo to arrayref
+
+    use Simple::IPInfo;
+    use Data::Dumper;
+
+    my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
+
+    my $r = append_table_ipinfo(
+        $arr, 
+        0,
+        write_file => '02.read_table_ipinfo_loc.csv', 
+        sep => ',', 
+        charset         => 'utf8',
+        return_arrayref => 1,
+        ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
+        write_head => [qw/ip some country prov isp country_code prov_code isp_code/ ], 
+    );
+    print Dumper($r);
+
+    my $asn_r = append_table_ipinfo(
+        $arr, 
+        0,
+        write_file => '02.read_table_ipinfo_as.csv', 
+        sep => ',', 
+        charset         => 'utf8',
+        return_arrayref => 1,
+        ipinfo_file => $Simple::IPInfo::IPINFO_AS_F,
+        ipinfo_names    => [qw/as/],
+    );
+    print Dumper($asn_r);
+
+=head1 ATTR
+
+=head2 DEBUG
+
+set $Simple::IPInfo::DEBUG = 1  for more details
+
+=head1 BIN
 
 =head2 add_ip_info.pl
 
@@ -69,104 +155,6 @@ src_file's inet is sorted by csvsort
 merge_inet.pl [src_inet_file1] [src_inet_file2] [dst_merge_file]
 
     $ merge_inet.pl city_inet.csv.sort.refine isp_inet.csv.sort.refine merge_city_isp_inet.csv
-
-=head1 METHOD
-
-=head2 get_ip_loc
-
-get ip location, with country, prov, isp, country_code, prov_code, isp_code
-
-返回IP区域信息，包括国家、省份、运营商，及其英文iso3166编号
-
-    my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
-
-    # {  
-    # $ip_a => { country => ... , prov => ..., isp => ..., country_code => ..., prov_code => ..., isp_code => ... }, 
-    # ...
-    # }
-
-=head2 get_ip_as
-
-get ip as number
-
-返回IP的AS号
-
-    my $rr = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
-
-    # {  
-    # $ip_a => { as => ... }, 
-    # $ip_b => { as => ... }, 
-    # }
-
-=head2 get_ipinfo
-
-get_ipinfo from some csv file, see also IPInfo_LOC.csv
-
-给定IP列表，以及csv文件，返回csv文件提供的IP信息，格式参考IPInfo_LOC.csv
-
-    my $rr = get_ipinfo([ '202.38.64.10', '202.96.196.33' ], 
-        ip_info_file => 'some_ipinfo.csv', 
-        use_ip_c => 0, 
-    );
-
-=head2 get_ipc_info
-
-get_ipc_info from ip info hash
-
-指定ip，从已知的ip_c段hash中取出对应的信息
-
-    my $r =  get_ipc_info('202.38.64.10', $rr);
-
-=head2  append_table_ipinfo
-
-add ipinfo to arrayref
-
-    use Simple::IPInfo;
-    use Data::Dumper;
-
-    my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
-
-    my $r = append_table_ipinfo(
-        $arr, 
-        0,
-        write_file => '02.read_table_ipinfo_loc.csv', 
-        sep => ',', 
-        charset         => 'utf8',
-        return_arrayref => 1,
-        ipinfo_names    => [qw/country prov isp/],
-        write_head => [qw/ip some country prov isp/ ], 
-    );
-    print Dumper($r);
-
-    my $asn_r = append_table_ipinfo(
-        $arr, 
-        0,
-        write_file => '02.read_table_ipinfo_as.csv', 
-        sep => ',', 
-        charset         => 'utf8',
-        return_arrayref => 1,
-        ipinfo_file => $Simple::IPInfo::IPINFO_AS_F,
-        ipinfo_names    => [qw/as/],
-    );
-    print Dumper($asn_r);
-
-=head2 get_ipinfo_io
-
-ip info is from http://ipinfo.io
-
-get ip location, with loc, country, isp, as number
-
-返回IP区域信息，包括地理位置、国家、运营商、AS号
-
-    my $r = get_ipinfo_io('202.38.64.10');
-    
-    print Dumper($r);
-
-=head1 ATTR
-
-=head2 DEBUG
-
-set $Simple::IPInfo::DEBUG = 1  for more details
 
 =head1 XBIN
 
