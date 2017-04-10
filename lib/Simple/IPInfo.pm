@@ -8,9 +8,13 @@ require Exporter;
   get_ipinfo
   get_ipc_info
 
+  ip_to_inet
+  inet_to_ip
+
   cidr_to_range
   append_table_ipinfo
   read_ipinfo
+  iterate_ipinfo
 );
 use utf8;
 use Data::Validate::IP qw/is_ipv4 is_ipv6 is_public_ipv4/;
@@ -48,6 +52,52 @@ sub cidr_to_range {
   return @inet;
 }
 
+sub iterate_ipinfo {
+    #ip_list is inet-sorted 
+    my ( $ip_list, %opt ) = @_;
+    $opt{i} //= 0;
+    $opt{return_arrayref} //= 0;
+    $o{ipinfo_file}  ||= $IPINFO_LOC_F;
+    $o{ipinfo_names} ||= [qw/country prov isp country_code prov_code isp_code/];
+
+    my $ip_info = read_ipinfo( $opt{ipinfo_file} );
+    my $n = $#$ip_info;
+
+    my ( $i, $ir ) = ( 0, $ip_info->[0] );
+    my ( $s, $e ) = @{$ir}{qw/s e/};
+
+    my $res = read_table($ip_list, 
+        %opt, 
+        conv_sub => sub {
+            my ($r) = @_;
+            my ( $ip, $inet, $rr ) = calc_ip_inet($r->[$opt{i}], \%opt);
+            print "\r$ip, $s, $e, $inet" if ( $DEBUG );
+
+            my $res_r;
+
+            if ( $rr ) {
+                $res_r = $rr;
+            } elsif ( $inet < $s or $i > $n ) {
+                $res_r = \%UNKNOWN;
+            }else {
+                while ( $inet > $e and $i < $n ) {
+                    $i++;
+                    $ir = $ip_info->[$i];
+                    ( $s, $e ) = @{$ir}{qw/s e/};
+                }
+                if ( $inet >= $s and $inet <= $e and $i <= $n ) {
+                    $res_r = $ir;
+                }
+            }
+            return [ @$r, @{$res_r}{@{$opt{ipinfo_names}}} ];    
+        }, 
+    );
+
+    print "\n" if ( $DEBUG );
+
+    return $res || $opt{write_file};
+} ## end sub get_ipinfo
+
 sub append_table_ipinfo {
     my ( $arr, $id, %o ) = @_;
     $o{ipinfo_file}  ||= $IPINFO_LOC_F;
@@ -84,7 +134,18 @@ sub ip_to_inet {
     return (-1, \%ERROR) unless(is_ip($ip));
     my $inet = unpack( "N", inet_aton( $ip ) );
     return ($inet, \%LOCAL) unless(is_public_ip($ip));
-    return $inet;
+    return ($inet, undef);
+}
+
+sub calc_ip_inet {
+    my ($c, $opt) =@_;
+
+    my $ip = $c=~/^\d+$/ ? inet_to_ip($c) : $c;
+
+    my @res = ( $ip, ip_to_inet($ip) );
+    $res[0]=~s/\.\d+$/.0/ if($opt->{use_ip_c});
+
+    return @res;
 }
 
 sub calc_ip_inet_list {

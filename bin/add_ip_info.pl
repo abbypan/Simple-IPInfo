@@ -15,9 +15,9 @@ $opt{H} //= 0;
 $opt{type} =  ($opt{t} and $opt{t} eq 'as') ? $Simple::IPInfo::IPINFO_AS_F : $Simple::IPInfo::IPINFO_LOC_F;
 $opt{names} = ($opt{t} and $opt{t} eq 'as') ? [ 'as' ] : [ qw/country prov isp country_code prov_code isp_code/ ];
 
-append_table_ipinfo(
-    $opt{f}, 
-    $opt{i},
+iterate_ipinfo(
+    $opt{f}, #inet-sorted file
+    id => $opt{i},
     write_file => $opt{d}, 
     sep => $opt{s}, 
     charset         => 'utf8',

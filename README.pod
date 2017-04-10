@@ -129,11 +129,16 @@ set $Simple::IPInfo::DEBUG = 1  for more details
 
 =head1 BIN
 
+=head2 add_inet.pl
+
+    perl add_inet.pl -f 02.ip_raw.csv -i 0 -d 02.ip_inet.csv
+    sort -t, -k3 -n 02.ip_inet.csv > 02.ip_inet.sort.csv
+
 =head2 add_ip_info.pl
 
     perl add_ip_info.pl -f xt/02.ip.csv -d xt/02.ip.csv.log -i 0 -t loc -H 1
 
-    f : source file 源文件
+    f : source file 源文件, inet-sorted
     d : dest file 目标文件
     i : ip is in cloumn x, ip在第x列
     H : skip head or not，default is 0 (not skip) 默认不跳过首行
