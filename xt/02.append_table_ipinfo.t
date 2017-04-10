@@ -16,7 +16,6 @@ my $r = append_table_ipinfo(
     write_head => [qw/ip some country prov isp country_code prov_code isp_code/ ], 
 );
 
-
 print Dumper($r);
 
 my $asn_r = append_table_ipinfo(
@@ -30,3 +29,16 @@ my $asn_r = append_table_ipinfo(
     ipinfo_names    => [qw/as/],
 );
 print Dumper($asn_r);
+
+my $inet_arr = [[ '3395339297', 'test'], ['3391504394' , 'ceshi'], ];
+my $r = append_table_ipinfo(
+    $inet_arr, 
+    0,
+    write_file => '02.inet_loc.csv', 
+    sep => ',', 
+    charset         => 'utf8',
+    return_arrayref => 1,
+    ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
+    write_head => [qw/inet some country prov isp country_code prov_code isp_code/ ], 
+);
+print Dumper($r);

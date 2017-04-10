@@ -15,14 +15,30 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
     use utf8;
 
     my $rr_loc = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
+    my $inet_rr_loc = get_ip_loc([ '3395339297', '3391504394' ]);
     my $rr_asn = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
-    print Dumper($rr_loc, $rr_asn);
+    print Dumper($rr_loc, $inet_rr_loc, $rr_asn);
+
+    my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
+    my $r = append_table_ipinfo(
+        $arr, 
+        0,
+        write_file => '02.ip_loc.csv', 
+        sep => ',', 
+        charset         => 'utf8',
+        return_arrayref => 1,
+        ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
+        write_head => [qw/ip some country prov isp country_code prov_code isp_code/ ], 
+    );
+    print Dumper($r);
 
 =head1 DESCRIPTION
 
     default ip as data: ftp://routeviews.org/dnszones/originas.bz2
 
     default ip location data: http://ip.taobao.com
+
+    use iso 3166 country_code, subdivision_1 code, isp shortcut name
 
 =head1 METHOD
 
@@ -83,7 +99,7 @@ add ipinfo to arrayref
     my $r = append_table_ipinfo(
         $arr, 
         0,
-        write_file => '02.read_table_ipinfo_loc.csv', 
+        write_file => '02.ip_loc.csv', 
         sep => ',', 
         charset         => 'utf8',
         return_arrayref => 1,
@@ -92,17 +108,18 @@ add ipinfo to arrayref
     );
     print Dumper($r);
 
-    my $asn_r = append_table_ipinfo(
-        $arr, 
+    my $inet_arr = [[ '3395339297', 'test'], ['3391504394' , 'ceshi'], ];
+    my $r = append_table_ipinfo(
+        $inet_arr, 
         0,
-        write_file => '02.read_table_ipinfo_as.csv', 
+        write_file => '02.inet_loc.csv', 
         sep => ',', 
         charset         => 'utf8',
         return_arrayref => 1,
-        ipinfo_file => $Simple::IPInfo::IPINFO_AS_F,
-        ipinfo_names    => [qw/as/],
+        ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
+        write_head => [qw/inet some country prov isp country_code prov_code isp_code/ ], 
     );
-    print Dumper($asn_r);
+    print Dumper($r);
 
 =head1 ATTR
 
