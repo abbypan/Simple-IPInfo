@@ -89,21 +89,24 @@ sub ip_to_inet {
 sub calc_ip_inet_list {
     my ( $ip_list, %opt ) = @_;
 
-    $opt{in_sub} //= sub { return ref($_[0]) eq 'ARRAY' ? $_[0][0] : $_[0] };
-    my @ip_inet = map { $opt{in_sub}->($_) } @$ip_list;
+    $opt{in_sub} //= sub { my ($r) = @_;return ref($r) eq 'ARRAY' ? $r->[0] : $r };
+    my $ip_inet = -f $ip_list ? read_table($ip_list, 
+        conv_sub => $opt{in_sub},
+        %opt,
+    ) : [ map { $opt{in_sub}->($_) } @$ip_list ];
 
-    if( $ip_inet[0]=~/^\d+$/){
-        @ip_inet = map { my $ip = inet_to_ip($_); [ $ip, ip_to_inet($ip) ] } @ip_inet;
+    if( $ip_inet->[-1]=~/^\d+$/){
+        @$ip_inet = map { my $ip = inet_to_ip($_); [ $ip, ip_to_inet($ip) ] } @$ip_inet;
     }else {
-        @ip_inet = map { [ $_, ip_to_inet($_) ] } @ip_inet;
+        @$ip_inet = map { [ $_, ip_to_inet($_) ] } @$ip_inet;
     }
 
     if ( $opt{use_ip_c} ) {
-        $_->[0]=~s/\.\d+$/.0/ for @ip_inet;
+        $_->[0]=~s/\.\d+$/.0/ for @$ip_inet;
     }
 
-    @ip_inet = sort { $a->[1] <=> $b->[1] } @ip_inet;
-    return \@ip_inet;
+    @$ip_inet = sort { $a->[1] <=> $b->[1] } @$ip_inet;
+    return $ip_inet;
 }
 
 sub get_ip_as {
