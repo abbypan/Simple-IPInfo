@@ -3,18 +3,16 @@ package Simple::IPInfo;
 require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(
+  read_ipinfo
+  iterate_ipinfo
+  get_ipinfo
+
   get_ip_loc
   get_ip_as
-  get_ipinfo
-  get_ipc_info
 
   ip_to_inet
   inet_to_ip
-
   cidr_to_range
-  append_table_ipinfo
-  read_ipinfo
-  iterate_ipinfo
 );
 use utf8;
 use Data::Validate::IP qw/is_ipv4 is_ipv6 is_public_ipv4/;
@@ -52,129 +50,124 @@ sub cidr_to_range {
   return @inet;
 }
 
-sub iterate_ipinfo {
-    #ip_list is inet-sorted 
-    my ( $ip_list, %opt ) = @_;
-    $opt{i} //= 0;
-    $opt{return_arrayref} //= 0;
-    $o{ipinfo_file}  ||= $IPINFO_LOC_F;
-    $o{ipinfo_names} ||= [qw/country prov isp country_code prov_code isp_code/];
+sub get_ipinfo {
+  my ( $ip_list, %opt ) = @_;
+  $opt{i}               //= 0;
+  $opt{return_arrayref} //= 1;
 
-    my $ip_info = read_ipinfo( $opt{ipinfo_file} );
-    my $n = $#$ip_info;
+  my $i       = 0;
+  my $ip_inet = read_table(
+    $ip_list,
+    conv_sub => sub {
+      my ( $r ) = @_;
+      my ( $ip, $inet, $rr ) = calc_ip_inet( $r->[ $opt{i} ], \%opt );
+      return [ $i++, $inet ];
+    },
+    return_arrayref => 1,
+  );
+  my @sorted_ip_inet = sort { $a->[1] <=> $b->[1] } @$ip_inet;
 
-    my ( $i, $ir ) = ( 0, $ip_info->[0] );
-    my ( $s, $e ) = @{$ir}{qw/s e/};
+  my $get_ip_info = iterate_ipinfo(
+    \@sorted_ip_inet,
+    i               => 1,
+    ipinfo_file     => $opt{ipinfo_file},
+    ipinfo_names    => $opt{ipinfo_names},
+    return_arrayref => 1,
+  );
 
-    my $res = read_table($ip_list, 
-        %opt, 
-        conv_sub => sub {
-            my ($r) = @_;
-            my ( $ip, $inet, $rr ) = calc_ip_inet($r->[$opt{i}], \%opt);
-            print "\r$ip, $s, $e, $inet" if ( $DEBUG );
+  my @sorted_ip_info = sort { $a->[0] <=> $b->[0] } @$get_ip_info;
 
-            my $res_r;
+  $i = 0;
+  my $start_col = $opt{reserve_inet} ? 1 : 2;
+  my $end_col   = $#{ $sorted_ip_info[0] };
+  my $res       = read_table(
+    $ip_list,
+    %opt,
+    conv_sub => sub {
+      my ( $r ) = @_;
+      return [ @$r, @{ $sorted_ip_info[ $i++ ] }[ $start_col .. $end_col ] ];
+    },
+  );
 
-            if ( $rr ) {
-                $res_r = $rr;
-            } elsif ( $inet < $s or $i > $n ) {
-                $res_r = \%UNKNOWN;
-            }else {
-                while ( $inet > $e and $i < $n ) {
-                    $i++;
-                    $ir = $ip_info->[$i];
-                    ( $s, $e ) = @{$ir}{qw/s e/};
-                }
-                if ( $inet >= $s and $inet <= $e and $i <= $n ) {
-                    $res_r = $ir;
-                }
-            }
-            return [ @$r, @{$res_r}{@{$opt{ipinfo_names}}} ];    
-        }, 
-    );
-
-    print "\n" if ( $DEBUG );
-
-    return $res || $opt{write_file};
+  return $res || $opt{write_file};
 } ## end sub get_ipinfo
 
-sub append_table_ipinfo {
-    my ( $arr, $id, %o ) = @_;
-    $o{ipinfo_file}  ||= $IPINFO_LOC_F;
-    $o{ipinfo_names} ||= [qw/country prov isp country_code prov_code isp_code/];
+sub iterate_ipinfo {
 
-    my $ip_info = get_ipinfo($arr, 
-        in_sub => sub { my ($r) = @_;return $r->[$id] }, 
-        use_ip_c => 1,  
-        %o);
+  #deal with large ip_list file, ip_list is inet-sorted
+  my ( $ip_list, %opt ) = @_;
+  $opt{i}               //= 0;
+  $opt{return_arrayref} //= 0;
+  $opt{ipinfo_file}  ||= $IPINFO_LOC_F;
+  $opt{ipinfo_names} ||= [qw/country prov isp country_code prov_code isp_code/];
 
-    read_table(
-        $arr, %o,
-        conv_sub => sub {
-            my ( $r ) = @_;
+  my $ip_info = read_ipinfo( $opt{ipinfo_file} );
+  my $n       = $#$ip_info;
 
-            my $ip = $r->[$id];
-            my $ip_c = $ip;
-            $ip_c=~s/\.\d+$/.0/;
+  my ( $i, $ir ) = ( 0, $ip_info->[0] );
+  my ( $s, $e ) = @{$ir}{qw/s e/};
 
-            my $dr = $ip_info->{$ip} || $ip_info->{$ip_c} || \%UNKNOWN;
+  my $res = read_table(
+    $ip_list,
+    conv_sub => sub {
+      my ( $r ) = @_;
+      my ( $ip, $inet, $rr ) = calc_ip_inet( $r->[ $opt{i} ], \%opt );
+      print "\r$ip, $s, $e, $inet" if ( $DEBUG );
 
-            $dr->{$_} ||= '' for @{ $o{ipinfo_names} };
-            [ @$r, @{ $dr }{ @{ $o{ipinfo_names} } } ];
-        } );
-} ## end sub append_table_ipinfo
+      my $res_r;
+
+      if ( $rr ) {
+        $res_r = $rr;
+      } elsif ( $inet < $s or $i > $n ) {
+        $res_r = \%UNKNOWN;
+      } else {
+        while ( $inet > $e and $i < $n ) {
+          $i++;
+          $ir = $ip_info->[$i];
+          ( $s, $e ) = @{$ir}{qw/s e/};
+        }
+        if ( $inet >= $s and $inet <= $e and $i <= $n ) {
+          $res_r = $ir;
+        }
+      }
+      return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
+    },
+    %opt,
+  );
+
+  print "\n" if ( $DEBUG );
+  return $res || $opt{write_file};
+} ## end sub iterate_ipinfo
 
 sub inet_to_ip {
-    my ($inet) = @_;
-    return inet_ntoa(pack('N',$inet));
+  my ( $inet ) = @_;
+  return inet_ntoa( pack( 'N', $inet ) );
 }
 
 sub ip_to_inet {
-    my ( $ip ) = @_;
-    return (-1, \%ERROR) unless(is_ip($ip));
-    my $inet = unpack( "N", inet_aton( $ip ) );
-    return ($inet, \%LOCAL) unless(is_public_ip($ip));
-    return ($inet, undef);
+  my ( $ip ) = @_;
+  return ( -1, \%ERROR ) unless ( is_ip( $ip ) );
+  my $inet = unpack( "N", inet_aton( $ip ) );
+  return ( $inet, \%LOCAL ) unless ( is_public_ip( $ip ) );
+  return ( $inet, undef );
 }
 
 sub calc_ip_inet {
-    my ($c, $opt) =@_;
+  my ( $c, $opt ) = @_;
 
-    my $ip = $c=~/^\d+$/ ? inet_to_ip($c) : $c;
+  my $ip = $c =~ /^\d+$/ ? inet_to_ip( $c ) : $c;
 
-    my @res = ( $ip, ip_to_inet($ip) );
-    $res[0]=~s/\.\d+$/.0/ if($opt->{use_ip_c});
+  my @res = ( $ip, ip_to_inet( $ip ) );
 
-    return @res;
-}
+  #$res[0]=~s/\.\d+$/.0/ if($opt->{use_ip_c});
 
-sub calc_ip_inet_list {
-    my ( $ip_list, %opt ) = @_;
-
-    $opt{in_sub} //= sub { my ($r) = @_;return ref($r) eq 'ARRAY' ? $r->[0] : $r };
-    my $ip_inet = -f $ip_list ? read_table($ip_list, 
-        conv_sub => $opt{in_sub},
-        %opt,
-        return_arrayref=>1, 
-    ) : [ map { $opt{in_sub}->($_) } @$ip_list ];
-
-    if( $ip_inet->[-1]=~/^\d+$/){
-        @$ip_inet = map { my $ip = inet_to_ip($_); [ $ip, ip_to_inet($ip) ] } @$ip_inet;
-    }else {
-        @$ip_inet = map { [ $_, ip_to_inet($_) ] } @$ip_inet;
-    }
-
-    if ( $opt{use_ip_c} ) {
-        $_->[0]=~s/\.\d+$/.0/ for @$ip_inet;
-    }
-
-    @$ip_inet = sort { $a->[1] <=> $b->[1] } @$ip_inet;
-    return $ip_inet;
+  return @res;
 }
 
 sub get_ip_as {
   my ( $ip_list, %opt ) = @_;
-  $opt{ipinfo_file} = $IPINFO_AS_F;
+  $opt{ipinfo_file}  = $IPINFO_AS_F;
+  $opt{ipinfo_names} = [qw/as/];
   return get_ipinfo( $ip_list, %opt );
 }
 
@@ -183,57 +176,6 @@ sub get_ip_loc {
   $opt{ipinfo_file} = $IPINFO_LOC_F;
   return get_ipinfo( $ip_list, %opt );
 }
-
-sub get_ipc_info {
-  my ( $ip, $info ) = @_;
-  my $ip_c = $ip;
-  $ip_c =~ s/\.\d+$/.0/;
-  return $info->{$ip_c};
-}
-
-sub get_ipinfo {
-    # large amount ip can use this function
-    # ip array ref => ( ip => { country,prov,isp,country_code,prov_code,isp_code } )
-    my ( $ip_list, %opt ) = @_;
-
-    my $ip_inet = calc_ip_inet_list( $ip_list, %opt );
-
-    my %result;
-    my $res_sub = $opt{result_sub} // sub { my ($ip, $inet, $rr) = @_; $result{$ip} = $rr; $result{$inet}=$rr; };
-
-    my $ip_info = read_ipinfo( $opt{ipinfo_file} );
-    my $n = $#$ip_info;
-
-    my ( $i, $r ) = ( 0, $ip_info->[0] );
-    my ( $s, $e ) = @{$r}{qw/s e/};
-
-    for my $x ( 0 .. $#$ip_inet ) {
-        my ( $ip, $inet, $rr ) = @{$ip_inet->[$x]};
-        print "\r$ip, $s, $e, $inet" if ( $DEBUG );
-
-        if ( $rr ) {
-            $res_sub->($ip, $inet, $rr);
-            next;
-        } elsif ( $inet < $s or $i > $n ) {
-            $res_sub->($ip, $inet, \%UNKNOWN);
-            next;
-        }
-
-        while ( $inet > $e and $i < $n ) {
-            $i++;
-            $r = $ip_info->[$i];
-            ( $s, $e ) = @{$r}{qw/s e/};
-        }
-
-        if ( $inet >= $s and $inet <= $e and $i <= $n ) {
-            $res_sub->($ip, $inet, $r);
-        }
-    } ## end for my $x ( @{$ip_inet}...)
-
-    print "\n" if ( $DEBUG );
-
-    return \%result;
-} ## end sub get_ipinfo
 
 sub read_ipinfo {
   my ( $f, $charset ) = @_;

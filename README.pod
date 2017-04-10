@@ -14,15 +14,17 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
     use Data::Dumper;
     use utf8;
 
-    my $rr_loc = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
-    my $inet_rr_loc = get_ip_loc([ '3395339297', '3391504394' ]);
-    my $rr_asn = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
-    print Dumper($rr_loc, $inet_rr_loc, $rr_asn);
+    my $rr_loc = get_ip_loc([ [ '202.38.64.10'], ['202.96.196.33'] ]);
+    my $inet_rr_loc = get_ip_loc([ ['3395339297'], ['3391504394'] ]);
+    print Dumper($rr_loc, $inet_rr_loc);
+
+    my $rr_asn = get_ip_as([ [ '202.38.64.10'], ['202.96.196.33'] ], reserve_inet=>1);
+    print Dumper($rr_asn);
 
     my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
-    my $r = append_table_ipinfo(
+    my $r = get_ipinfo(
         $arr, 
-        0,
+        i => 0,
         write_file => '02.ip_loc.csv', 
         sep => ',', 
         charset         => 'utf8',
@@ -48,57 +50,31 @@ get ip location, with country, prov, isp, country_code, prov_code, isp_code
 
 返回IP区域信息，包括国家、省份、运营商，及其英文iso3166编号
 
-    my $rr = get_ip_loc([ '202.38.64.10', '202.96.196.33' ]);
-
-    # {  
-    # $ip_a => { country => ... , prov => ..., isp => ..., country_code => ..., prov_code => ..., isp_code => ... }, 
-    # ...
-    # }
-
 =head2 get_ip_as
 
 get ip as number
 
 返回IP的AS号
 
-    my $rr = get_ip_as([ '202.38.64.10', '202.96.196.33' ]);
-
-    # {  
-    # $ip_a => { as => ... }, 
-    # $ip_b => { as => ... }, 
-    # }
-
 =head2 get_ipinfo
 
-get_ipinfo from some csv file, see also inet_loc.csv
+get ip info, with specified ipinfo_file 
 
-给定IP列表，以及csv文件，返回csv文件提供的IP信息，格式参考inet_loc.csv
 
-    my $rr = get_ipinfo([ '202.38.64.10', '202.96.196.33' ], 
-        ip_info_file => 'some_ipinfo.csv', 
-        use_ip_c => 0, 
-    );
+=head2  iterate_ipinfo
 
-=head2 get_ipc_info
+add ipinfo to inet-sorted arrayref, for large file
 
-get_ipc_info from ip info hash
-
-指定ip，从已知的ip_c段hash中取出对应的信息
-
-    my $r =  get_ipc_info('202.38.64.10', $rr);
-
-=head2  append_table_ipinfo
-
-add ipinfo to arrayref
+Note that, lines are inet-sorted
 
     use Simple::IPInfo;
     use Data::Dumper;
 
-    my $arr = [ [qw/202.38.64.10 xxx/], [qw/8.8.8.8 yyy/], ];
+    my $arr = [ [qw/8.8.8.8 yyy/], [qw/202.38.64.10 xxx/], ];
 
-    my $r = append_table_ipinfo(
-        $arr, 
-        0,
+    my $r = iterate_ipinfo(
+        $arr,  # or some big file : $big_csv, 
+        i => 0,
         write_file => '02.ip_loc.csv', 
         sep => ',', 
         charset         => 'utf8',
@@ -108,10 +84,10 @@ add ipinfo to arrayref
     );
     print Dumper($r);
 
-    my $inet_arr = [[ '3395339297', 'test'], ['3391504394' , 'ceshi'], ];
-    my $r = append_table_ipinfo(
+    my $inet_arr = [['3391504394' , 'ceshi'], [ '3395339297', 'test'], ];
+    my $r = iterate_ipinfo(
         $inet_arr, 
-        0,
+        i=>0,
         write_file => '02.inet_loc.csv', 
         sep => ',', 
         charset         => 'utf8',
