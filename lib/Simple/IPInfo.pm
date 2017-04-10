@@ -15,6 +15,7 @@ require Exporter;
 use utf8;
 use Data::Validate::IP qw/is_ipv4 is_ipv6 is_public_ipv4/;
 use SimpleR::Reshape;
+use Data::Dumper;
 use JSON;
 use File::Spec;
 use Net::CIDR qw/cidr2range/;
@@ -53,7 +54,7 @@ sub append_table_ipinfo {
     $o{ipinfo_names} ||= [qw/country prov isp country_code prov_code isp_code/];
 
     my $ip_info = get_ipinfo($arr, 
-        in_sub => sub { return $_[0][$id] }, 
+        in_sub => sub { my ($r) = @_;return $r->[$id] }, 
         use_ip_c => 1,  
         %o);
 
@@ -93,6 +94,7 @@ sub calc_ip_inet_list {
     my $ip_inet = -f $ip_list ? read_table($ip_list, 
         conv_sub => $opt{in_sub},
         %opt,
+        return_arrayref=>1, 
     ) : [ map { $opt{in_sub}->($_) } @$ip_list ];
 
     if( $ip_inet->[-1]=~/^\d+$/){
