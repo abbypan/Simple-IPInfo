@@ -225,6 +225,8 @@ inet_loc.csv : s, e , country, prov, isp , country_code, prov_code, isp_code
 
 Abby Pan <abbypan@gmail.com>
 
-thanks to Gabor Szabo <szabgab@gmail.com>
+Thanks to Gabor Szabo <szabgab@gmail.com>, Neil Bowers <neil@bowers.com>
+
+
 
 =cut
