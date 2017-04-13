@@ -73,7 +73,7 @@ Note that, lines are inet-sorted
     my $arr = [ [qw/8.8.8.8 yyy/], [qw/202.38.64.10 xxx/], ];
 
     my $r = iterate_ipinfo(
-        $arr,  # or some big file : $big_csv, 
+        $arr,  # or some big inet-sorted file : $big_inet_sorted_csv, 
         i => 0,
         write_file => '02.ip_loc.csv', 
         sep => ',', 
