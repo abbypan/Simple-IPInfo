@@ -10,6 +10,3 @@ for my $i ( 1 .. 255){
 	close $fhr;
 }
 close $fh;
-
-system("tar zcvf $f.tgz $f ; rm $f");
-

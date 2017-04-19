@@ -71,12 +71,12 @@ sub select_data {
     #print "old ($ip_o, $o_s, $o_p, $o_i), new ($ip_n, $n_s, $n_p, $n_i)\n";
 
     my ($s, $p, $i);
-    if($n_s eq '未知'){
+    if($n_s eq ''){
         ($s, $p, $i)=($o_s, $o_p, $o_i);
-    }elsif($n_s eq $o_s and $n_i eq '未知'){
+    }elsif($n_s eq $o_s and $n_i eq ''){
         $s = $n_s; $i = $o_i;
-        $p = $n_p eq '未知' ? $o_p : $n_p;
-    }elsif($n_s eq $o_s and $n_p eq '未知'){
+        $p = $n_p eq '' ? $o_p : $n_p;
+    }elsif($n_s eq $o_s and $n_p eq ''){
         $s = $n_s; $i = $n_i;
         $p = $o_p;
     }else{
@@ -93,7 +93,8 @@ sub read_one_line {
     $line=~s/\.1,/.0,/;
     return unless($line);
 
-    my @data = split /,/, $line;
+    my @data = split /,/, $line, -1;
+    $_ ||= '' for @data;
     my $n = unpack('N', inet_aton($data[0]));
     return ($n, @data);
 }

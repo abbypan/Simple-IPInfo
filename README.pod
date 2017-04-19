@@ -162,66 +162,40 @@ merge_inet.pl [src_inet_file1] [src_inet_file2] [dst_merge_file]
 
 =head2 get ip as data from routeviews.org
     
-    perl parse_ip_as.pl 
-
-    mv originas.csv inet_as.csv
+    $ perl gen_inet_as.pl inet_as.csv
 
 =head2 get ip loc from taobao
 
-    1) init data dir, and null csv file
+1) init data dir, and send ip query to taobao
 
-    perl init_ip_loc.pl
+    ask_ip_loc_init.pl
+    ask_ip_loc.pl
 
-    2) add ask_ip_loc.pl to crontab, for example
+2) merge data/*.csv to ip_loc_taobao.csv , tidy it, update old ip_loc.csv
 
-    */5 * * * * cd ip_loc_taobao/bin && perl ask_ip_loc.pl >/dev/null 2>&1
-    
-    3) merge data/*.csv to ip_loc_taobao.csv , get main tidy csv
+    $ perl ip_loc_taobao.pl
+    $ perl ip_loc_tidy.pl ip_loc_taobao.csv ip_loc_taobao.tidy.csv
+    $ perl ip_loc_update.pl ip_loc.csv ip_loc_taobao.tidy.csv ip_loc_update.csv
 
-    perl merge_ip_loc.pl
+3) guess loc from as, update , write new ip_loc.csv
 
-    perl tidy_ip_loc.pl ip_loc_taobao.csv ip_loc_taobao.tidy.csv
+    $ perl ip_loc_from_as.pl ip_loc_update.csv ip_loc_from_as.csv
+    $ perl ip_loc_update.pl ip_loc_update.csv ip_loc_from_as.csv ip_loc.csv
 
-    4) compare with ip_loc_old.csv
+4) map into inet file, and refine inet_loc_src.csv 
 
-    #按inet顺序
-    perl sort_ip_loc.pl ip_loc_old.csv ip_loc_old.sort.csv
+    $ perl make_inet_from_cidr.pl ip_loc.csv inet_loc_raw.csv 'ip,staterov,isp'
+    $ refine_inet.pl inet_loc_raw.csv inet_loc_src.csv
 
-    perl tidy_ip_loc.pl ip_loc_old.sort.csv ip_loc_old.tidy.csv
-
-    perl compare_ip_loc.pl  ip_loc_old.tidy.csv ip_loc_taobao.tidy.csv  ip_loc_compare.csv
-
-    5) fix cn ip loc, guess by same as number
-
-    perl fix_ip_loc.pl ip_loc_compare.csv  ip_loc_fix.csv
-
-    6) merge with fix_cn data
-
-    perl compare_ip_loc.pl ip_loc_compare.csv ip_loc_fix.csv ip_loc.csv
-
-    7) parse ip_loc.csv, map ipc to inet range
-
-    perl parse_ip_loc.pl ip_loc.csv ip_loc_inet.csv
-
-    mv ip_loc_inet.csv inet_loc_src.csv
-
-    9) rename ip_loc.csv to old
-
-    mv ip_loc.csv ip_loc_old.tidy.csv
-
-=head2 add iso_3166 code for inet_loc_src.csv
-
-use merge_file.pl from SimpleR::Reshape 
+5) add iso_3166 code for inet_loc_src.csv, use merge_file.pl from SimpleR::Reshape 
 
 inet_loc_src.csv : s, e , country, prov, isp 
 
 inet_loc.csv : s, e , country, prov, isp , country_code, prov_code, isp_code
 
-    merge_file.pl -f country.csv -k 1 -v 0 -F inet_loc_src.csv -K 2 -o inet_loc.csv.c
-    merge_file.pl -f country_prov.csv -k 0,3 -v 1 -F inet_loc.csv.c -K 5,3 -o inet_loc.csv.p
-    merge_file.pl -f country_isp.csv -k 0,3 -v 1 -F inet_loc.csv.p -K 5,4 -o inet_loc.csv
-    rm inet_loc.csv.c
-    rm inet_loc.csv.p
+    $ merge_file.pl -f country.csv -k 1 -v 0 -F inet_loc_src.csv -K 2 -o inet_loc.csv.c
+    $ merge_file.pl -f country_prov.csv -k 0,3 -v 1 -F inet_loc.csv.c -K 5,3 -o inet_loc.csv.p
+    $ merge_file.pl -f country_isp.csv -k 0,3 -v 1 -F inet_loc.csv.p -K 5,4 -o inet_loc.csv
 
 =head1 AUTHOR
 

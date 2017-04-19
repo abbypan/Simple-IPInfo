@@ -11,9 +11,9 @@ our $MIN_RATE = 0.8;
 $Simple::IPInfo::DEBUG = 1;
 
 my ($src, $dst) = @ARGV; 
-read_table_ipinfo(
+iterate_ipinfo(
     $src, 
-    0,
+    id => 0,
     write_file => "$dst.asn", 
     skip_sub => sub { $_[0][1] ne '中国' ? 1 : 0 } ,
     sep => ',', 
@@ -29,7 +29,7 @@ cast(
     sep => ',', 
     names => [ qw/ip state prov isp asn/ ], 
     id => [ 4 ],
-    skip_sub => sub { (! $_[0][4] or $_[0][4] eq '未知') ? 1 : 0 } ,
+    skip_sub => sub { (! $_[0][4] or $_[0][4] eq '') ? 1 : 0 } ,
     measure => [3], 
     value => sub { 1 }, 
     reduce_sub => sub { my ($last, $now) = @_; return $last+$now; }, 
@@ -43,7 +43,7 @@ open my $fh, '<:utf8', "$dst.asn.isp.cnt";
 my $head = <$fh>;
 close $fh;
 chomp $head;
-my @header = split /,/, $head;
+my @header = split /,/, $head, -1;
 shift @header;
 
 my %asn_isp;
@@ -73,14 +73,17 @@ read_table("$dst.asn",
     sep=>',', 
     charset         => 'utf8',
     skip_head => 1, 
+    names => [ qw/ip state prov isp asn/ ], 
     conv_sub => sub {
         my ($r) = @_;
-    names => [ qw/ip state prov isp asn/ ], 
+        $_ ||='' for @$r;
+
         my ($ip, $state, $prov, $isp, $asn) = @$r;
+        return if($isp ne '');
 
         if($asn and $asn=~/^\d+$/){
-            $isp = $asn_isp{$asn};
-        return [ $ip, $state, $prov, $isp ] if($isp and $isp ne '未知'); 
+            $isp = $asn_isp{$asn} || '';
+            return [ $ip, $state, $prov, $isp ] if($isp ne ''); 
         }
         return;
     }, 

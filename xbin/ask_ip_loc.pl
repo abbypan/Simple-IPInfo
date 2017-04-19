@@ -6,8 +6,12 @@ use FindBin;
 $|=1;
 
 our $DATA_DIR='data';
-exit if(glob("$DATA_DIR/*.temp"));
 
+our $PRIVATE = { 
+    country => '局域网',
+    region => '局域网',
+    isp => '局域网',
+};
 
 my ($i) = @ARGV;
 $i = select_file_id() if(!$i);
@@ -22,16 +26,22 @@ sub write_ip_c {
 	open my $fh,'>', "$file.temp";
 	close $fh;
 
-	open my $fh,'>', "$file.temp";
+	open my $fh,'>>', "$file.temp";
 	for my $j ( 0 .. 255 ){
-		for my $k (0 .. 255){
-			my $ip = "$i.$j.$k.1";
-			print "\r$ip";
-			next unless ( is_public_ipv4($ip) );
-			my $r = ask_ip_taobao($ip);
-			my $info =join(",",@{$r}{qw/ip country region isp/});
-			print $fh $info, "\n";
-		}
+        for my $k (0 .. 255){
+            my $ip = "$i.$j.$k.1";
+            print "\r$ip";
+            if(is_public_ipv4($ip) ){
+                my $r = ask_ip_taobao($ip);
+                $r->{$_}=~s/,//g for keys(%$r);
+                my $info =join(",","$i.$j.$k.0", @{$r}{qw/country region isp/});
+                print $fh $info, "\n";
+                sleep 3;
+            }else{
+                my $info =join(",","$i.$j.$k.0", @{$PRIVATE}{qw/country region isp/});
+                print $fh $info, "\n";
+            }
+        }
 	}
 	close $fh;
 
@@ -40,19 +50,30 @@ sub write_ip_c {
 }
 
 sub ask_ip_taobao {
-	my ($ip) = @_;
+    my ($ip) = @_;
 
-	my $url = "http://ip.taobao.com/service/getIpInfo.php?ip=$ip";
-    my $c = `curl -s "$url"`;
-	my $r = decode_json($c);
-	my $h = $r->{data};
-	$h->{$_} = encode( 'utf8' =>  $h->{$_}, Encode::FB_CROAK)
-		for keys(%$h);
-	return $h;
+    for( 1 .. 5 ){
+        my $url = "http://ip.taobao.com/service/getIpInfo.php?ip=$ip";
+        my $c = `/usr/bin/curl -s "$url"`;
+        my $r;
+        eval {
+            $r = decode_json($c);
+        };
+        unless($r){
+            print "retry $ip\n";
+            sleep 3;
+            next;
+        }
+        my $h = $r->{data};
+        $h->{$_} = encode( 'utf8' =>  $h->{$_}, Encode::FB_CROAK)
+        for keys(%$h);
+        return $h;
+    }
 }
 
 sub select_file_id {
 	my @files = map { $_->[0] } 
+    grep { ! -f "$_->[0].temp" }
 	sort { $a->[1] <=> $b->[1] } 
 	map { [ $_, (stat($_))[9] ] } 
 	glob("$DATA_DIR/*.csv");
