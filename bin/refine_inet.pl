@@ -14,9 +14,14 @@ while ( <$fh> ) {
   chomp;
   my ( $s, $e, $d ) = m#^(\d+),(\d+),(.*)$#;
   $d //= '';
-  if ( ( $old_d eq $d ) and ( $old_e + 1 == $s ) ) {
+  if ( ( $old_d eq $d ) and (
+          ( $old_e + 1 == $s )
+              or
+          ( $s>=$old_s and $s<$old_e and $e>$old_e )
+      )) {
     $old_e = $e;
-  } else {
+  }
+  else {
     print $fhw join( ",", $old_s, $old_e, $old_d ), "\n";
     ( $old_s, $old_e, $old_d ) = ( $s, $e, $d );
   }
