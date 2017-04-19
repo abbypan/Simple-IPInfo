@@ -109,19 +109,19 @@ csv is in xt/ directory
 
 =head2 add_inet.pl
 
-    perl add_inet.pl -f 02.ip_raw.csv -i 0 -d 02.ip_inet.csv
-    sort -t, -k3 -n 02.ip_inet.csv > 02.ip_inet.sort.csv
+    $ add_inet.pl -f 02.ip_raw.csv -i 0 -d 02.ip_inet.csv
+    $ sort -t, -k3 -n 02.ip_inet.csv > 02.ip_inet.sort.csv
 
 =head2 add_ip_info.pl
 
-    add_ip_info.pl -f 02.ip_inet.sort.csv -d 02.add_ip_info.csv -i 0 -t loc
+    $ add_ip_info.pl -f 02.ip_inet.sort.csv -d 02.add_ip_info.csv -i 0 -t loc
 
-    f : source file 源文件, inet-sorted
-    d : dest file 目标文件
-    i : ip is in cloumn x, ip在第x列
-    H : skip head or not，default is 0 (not skip) 默认不跳过首行
-    t : loc or as, default is loc；添加信息类型，默认是加loc信息，也可指定为as
-    s : sep character, default is ',' 默认分隔符为逗号
+    -f : source file 源文件, inet-sorted
+    -d : dest file 目标文件
+    -i : ip is in cloumn x, ip在第x列
+    -H : skip head or not，default is 0 (not skip) 默认不跳过首行
+    -t : loc or as, default is loc；添加信息类型，默认是加loc信息，也可指定为as
+    -s : sep character, default is ',' 默认分隔符为逗号
 
 =head2 make_inet_from_cidr.pl
 
@@ -158,7 +158,7 @@ merge_inet.pl [src_inet_file1] [src_inet_file2] [dst_merge_file]
 
 =head1 XBIN
 
-    system need install curl、bunzip2、tar
+install: curl bunzip2 tar
 
 =head2 get ip as data from routeviews.org
     
@@ -202,7 +202,5 @@ inet_loc.csv : s, e , country, prov, isp , country_code, prov_code, isp_code
 Abby Pan <abbypan@gmail.com>
 
 Thanks to Gabor Szabo <szabgab@gmail.com>, Neil Bowers <neil@bowers.com>
-
-
 
 =cut
