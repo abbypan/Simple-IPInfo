@@ -20,6 +20,7 @@ while ( <$fh> ) {
           ( $s>=$old_s and $s<$old_e and $e>$old_e )
       )) {
     $old_e = $e;
+  }elsif( ( $old_d eq $d ) and ($s>=$old_s) and ($e<=$old_e) ){
   }
   else {
     print $fhw join( ",", $old_s, $old_e, $old_d ), "\n";
