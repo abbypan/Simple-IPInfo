@@ -22,12 +22,10 @@ use JSON;
 use File::Spec;
 use Net::CIDR qw/cidr2range/;
 use Socket qw/inet_aton inet_ntoa/;
-use Memoize;
-memoize( 'read_ipinfo' );
 
 our $DEBUG = 0;
 
-our $VERSION = 0.10;
+our $VERSION = 0.11;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath( __FILE__ );
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "inet_loc.csv" );
@@ -98,8 +96,8 @@ sub iterate_ipinfo {
   my ( $ip_list, %opt ) = @_;
   $opt{i}               //= 0;
   $opt{return_arrayref} //= 0;
-  $opt{ipinfo_file}  ||= $IPINFO_LOC_F;
-  $opt{ipinfo_names} ||= [qw/country area isp country_code area_code isp_code/];
+  $opt{ipinfo_file}  //= $IPINFO_LOC_F;
+  $opt{ipinfo_names} //= [qw/country area isp country_code area_code isp_code/];
 
   my $ip_info = read_ipinfo( $opt{ipinfo_file} );
   my $n       = $#$ip_info;
@@ -115,6 +113,8 @@ sub iterate_ipinfo {
 
       my $res_r;
 
+      my $rem_i = $i>$n ? 0 : $i;
+
       if ( $rr ) {
         $res_r = $rr;
       } elsif ( $inet < $s or $i > $n ) {
@@ -127,10 +127,13 @@ sub iterate_ipinfo {
         }
         if ( $inet >= $s and $inet <= $e and $i <= $n ) {
           $res_r = $ir;
+          print "$i : $ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
+          $rem_i = $i;
         }
       }
 
-      print "$ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
+      $i = $rem_i; #　last $i to found s,e
+
 
       return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
     },
@@ -180,23 +183,22 @@ sub get_ip_loc {
 }
 
 sub read_ipinfo {
-  my ( $f, $charset ) = @_;
-  $f ||= $IPINFO_LOC_F;
-  $charset ||= 'utf8';
+    my ( $f, $charset ) = @_;
+    $f //= $IPINFO_LOC_F;
+    $charset //= 'utf8';
 
-  #local $/;
-  my @d;
-  open my $fh, "<:$charset", $f;
-  chomp( my $h = <$fh> );
-  my @head = split /,/, $h;
-  while ( my $c = <$fh> ) {
-    chomp( $c );
-    my @line = split /,/, $c;
-    my %k = map { $head[$_] => $line[$_] } ( 0 .. $#head );
-    push @d, \%k;
-  }
-  close $fh;
-  return \@d;
+    my @d;
+    open my $fh, "<:$charset", $f;
+    chomp( my $h = <$fh> );
+    my @head = split /,/, $h;
+    while ( my $c = <$fh> ) {
+        chomp( $c );
+        my @line = split /,/, $c;
+        my %k = map { $head[$_] => $line[$_] } ( 0 .. $#head );
+        push @d, \%k;
+    }
+    close $fh;
+    return \@d;
 } ## end sub read_ipinfo
 
 sub is_ip {

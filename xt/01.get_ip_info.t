@@ -23,8 +23,8 @@ my $rr = get_ipinfo([ [ '202.38.64.10'], ['202.96.196.33'] ], reserve_inet=>1);
 #print Dumper($rr),"\n";
 is($rr->[0][1],  '3391504394', 'get_ipinfo reserve_inet');
 
-my $rr = get_ip_as([ ['202.38.64.10'], ['202.96.196.33'] ]);
+my $rr = get_ip_as([ ['8.8.8.8'], ['202.38.64.10'], ['202.96.196.33'] ]);
 #print Dumper($rr),"\n";
-is($rr->[0][1],  '4538', 'get_ip_as');
+is($rr->[1][1],  '4538', 'get_ip_as');
 
 done_testing;
