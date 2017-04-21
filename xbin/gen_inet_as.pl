@@ -24,7 +24,7 @@ sub parse_raw_file {
     my ( $raw, $temp ) = @_;
     open my $fh,  '<', $raw;
     open my $fhw, '>', $temp;
-    print $fhw "-1,-1,-1\n";
+    print $fhw "s,e,as\n";
     while (<$fh>) {
         my $rr = extract_asn_line($_);
         print $fhw join(",", @$rr),"\n";
