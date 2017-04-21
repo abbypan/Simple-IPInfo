@@ -33,7 +33,7 @@ my ( $vol, $dir, $file ) = File::Spec->splitpath( __FILE__ );
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "inet_loc.csv" );
 our $IPINFO_AS_F  = File::Spec->catpath( $vol, $dir, "inet_as.csv" );
 
-my @key = qw/country prov isp country_code prov_code isp_code as/;
+my @key = qw/country area isp country_code area_code isp_code as/;
 our %UNKNOWN = map { $_ => '' } @key;
 our %ERROR   = map { $_ => 'error' } @key;
 our %LOCAL   = map { $_ => 'local' } @key;
@@ -99,7 +99,7 @@ sub iterate_ipinfo {
   $opt{i}               //= 0;
   $opt{return_arrayref} //= 0;
   $opt{ipinfo_file}  ||= $IPINFO_LOC_F;
-  $opt{ipinfo_names} ||= [qw/country prov isp country_code prov_code isp_code/];
+  $opt{ipinfo_names} ||= [qw/country area isp country_code area_code isp_code/];
 
   my $ip_info = read_ipinfo( $opt{ipinfo_file} );
   my $n       = $#$ip_info;

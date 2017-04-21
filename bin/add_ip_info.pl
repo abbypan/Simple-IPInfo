@@ -13,7 +13,7 @@ $opt{i} //= 0;
 $opt{s} //= ',';
 $opt{H} //= 0; 
 $opt{type} =  ($opt{t} and $opt{t} eq 'as') ? $Simple::IPInfo::IPINFO_AS_F : $Simple::IPInfo::IPINFO_LOC_F;
-$opt{names} = ($opt{t} and $opt{t} eq 'as') ? [ 'as' ] : [ qw/country prov isp country_code prov_code isp_code/ ];
+$opt{names} = ($opt{t} and $opt{t} eq 'as') ? [ 'as' ] : [ qw/country area isp country_code area_code isp_code/ ];
 
 iterate_ipinfo(
     $opt{f}, #inet-sorted file

@@ -1,7 +1,7 @@
 Release history for Perl module Simple::IPInfo
 
 0.10 2017-04- ABBYPAN
-    - add iso3166 code support : country_code, prov_code; and isp_code
+    - add iso3166 code support : country_code, area_code; and isp_code
     - add iterate_ipinfo for large file
     - use get_ipinfo for small file / arrayref, return arrayref but not hashref now
     - add reserve_inet option for get_ipinfo

@@ -29,8 +29,8 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
         sep => ',', 
         charset         => 'utf8',
         return_arrayref => 1,
-        ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
-        write_head => [qw/ip some country prov isp country_code prov_code isp_code/ ], 
+        ipinfo_names    => [qw/country area isp country_code area_code isp_code/],
+        write_head => [qw/ip some country area isp country_code area_code isp_code/ ], 
     );
     print Dumper($r);
 
@@ -46,7 +46,7 @@ Simple::IPInfo - Get IP/IPList Info (location, as number, etc)
 
 =head2 get_ip_loc
 
-get ip location, with country, prov, isp, country_code, prov_code, isp_code
+get ip location, with country, area, isp, country_code, area_code, isp_code
 
 返回IP区域信息，包括国家、省份、运营商，及其英文iso3166编号
 
@@ -79,8 +79,8 @@ Note that, lines are inet-sorted
         sep => ',', 
         charset         => 'utf8',
         return_arrayref => 1,
-        ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
-        write_head => [qw/ip some country prov isp country_code prov_code isp_code/ ], 
+        ipinfo_names    => [qw/country area isp country_code area_code isp_code/],
+        write_head => [qw/ip some country area isp country_code area_code isp_code/ ], 
     );
     print Dumper($r);
 
@@ -92,8 +92,8 @@ Note that, lines are inet-sorted
         sep => ',', 
         charset         => 'utf8',
         return_arrayref => 1,
-        ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
-        write_head => [qw/inet some country prov isp country_code prov_code isp_code/ ], 
+        ipinfo_names    => [qw/country area isp country_code area_code isp_code/],
+        write_head => [qw/inet some country area isp country_code area_code isp_code/ ], 
     );
     print Dumper($r);
 
@@ -184,17 +184,17 @@ install: curl bunzip2 tar
 
 4) map into inet file, and refine inet_loc_src.csv 
 
-    $ perl make_inet_from_cidr.pl ip_loc.csv inet_loc_raw.csv 'ip,staterov,isp'
+    $ perl make_inet_from_cidr.pl ip_loc.csv inet_loc_raw.csv 'ip,countryrov,isp'
     $ refine_inet.pl inet_loc_raw.csv inet_loc_src.csv
 
 5) add iso_3166 code for inet_loc_src.csv, use merge_file.pl from SimpleR::Reshape 
 
-inet_loc_src.csv : s, e , country, prov, isp 
+inet_loc_src.csv : s, e , country, area, isp 
 
-inet_loc.csv : s, e , country, prov, isp , country_code, prov_code, isp_code
+inet_loc.csv : s, e , country, area, isp , country_code, area_code, isp_code
 
     $ merge_file.pl -f country.csv -k 1 -v 0 -F inet_loc_src.csv -K 2 -o inet_loc.csv.c
-    $ merge_file.pl -f country_prov.csv -k 0,3 -v 1 -F inet_loc.csv.c -K 5,3 -o inet_loc.csv.p
+    $ merge_file.pl -f country_area.csv -k 0,3 -v 1 -F inet_loc.csv.c -K 5,3 -o inet_loc.csv.p
     $ merge_file.pl -f country_isp.csv -k 0,3 -v 1 -F inet_loc.csv.p -K 5,4 -o inet_loc.csv
 
 =head1 AUTHOR

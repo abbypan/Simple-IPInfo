@@ -1,4 +1,4 @@
-s,e,country,prov,isp,country_code,prov_code,isp_code
+s,e,country,area,isp,country_code,area_code,isp_code
 -1,-1,无效,无效,无效,,,
 16777216,16777471,澳大利亚,,,AU,,
 16777472,16778239,中国,福建,电信,CN,35,TEL

@@ -27,7 +27,7 @@ cast(
     "$dst.asn", 
     cast_file => "$dst.asn.isp.cnt", 
     sep => ',', 
-    names => [ qw/ip state prov isp asn/ ], 
+    names => [ qw/ip country area isp asn/ ], 
     id => [ 4 ],
     skip_sub => sub { (! $_[0][4] or $_[0][4] eq '') ? 1 : 0 } ,
     measure => [3], 
@@ -73,17 +73,17 @@ read_table("$dst.asn",
     sep=>',', 
     charset         => 'utf8',
     skip_head => 1, 
-    names => [ qw/ip state prov isp asn/ ], 
+    names => [ qw/ip country area isp asn/ ], 
     conv_sub => sub {
         my ($r) = @_;
         $_ ||='' for @$r;
 
-        my ($ip, $state, $prov, $isp, $asn) = @$r;
+        my ($ip, $country, $area, $isp, $asn) = @$r;
         return if($isp ne '');
 
         if($asn and $asn=~/^\d+$/){
             $isp = $asn_isp{$asn} || '';
-            return [ $ip, $state, $prov, $isp ] if($isp ne ''); 
+            return [ $ip, $country, $area, $isp ] if($isp ne ''); 
         }
         return;
     }, 

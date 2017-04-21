@@ -1,4 +1,4 @@
-country_code,prov_code,country,prov
+country_code,area_code,country,area
 CN,11,中国,北京
 CN,12,中国,天津
 CN,13,中国,河北

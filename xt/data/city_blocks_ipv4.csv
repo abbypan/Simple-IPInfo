@@ -1,4 +1,4 @@
-network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_provider,postal_code,latitude,longitude
+network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_areaider,postal_code,latitude,longitude
 1.0.0.0/24,2077456,2077456,,0,0,,-27,133.0000
 1.0.1.0/24,1814991,1814991,,0,0,,35,105.0000
 1.0.2.0/23,1814991,1814991,,0,0,,35,105.0000

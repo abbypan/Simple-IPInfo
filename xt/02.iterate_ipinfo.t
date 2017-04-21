@@ -13,8 +13,8 @@ my $r = get_ipinfo(
     charset         => 'utf8',
     return_arrayref => 1,
     ipinfo_file => $Simple::IPInfo::IPInfo_LOC_F, 
-    ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
-    write_head => [qw/ip some country prov isp country_code prov_code isp_code/ ], 
+    ipinfo_names    => [qw/country area isp country_code area_code isp_code/],
+    write_head => [qw/ip some country area isp country_code area_code isp_code/ ], 
 );
 #print Dumper($r);
 is($r->[-1][-3],  'US', 'get_ipinfo return_arrayref');
@@ -26,8 +26,8 @@ my $r = iterate_ipinfo(
     sep => ',', 
     charset         => 'utf8',
     return_arrayref => 1,
-    ipinfo_names    => [qw/country prov isp country_code prov_code isp_code/],
-    write_head => [qw/inet some country prov isp country_code prov_code isp_code/ ], 
+    ipinfo_names    => [qw/country area isp country_code area_code isp_code/],
+    write_head => [qw/inet some country area isp country_code area_code isp_code/ ], 
     #skip_head => 1, 
 );
 #print Dumper($r);
