@@ -6,6 +6,7 @@ Release history for Perl module Simple::IPInfo
     - use get_ipinfo for small file / arrayref, return arrayref but not hashref now
     - add reserve_inet option for get_ipinfo
     - add make_inet_from_cidr.pl / refine_inet.pl / merge_inet.pl
+    - "state -> country", "prov -> area"
 
 0.06 2014-12-?? ABBYPAN
     - Added this Changes file
