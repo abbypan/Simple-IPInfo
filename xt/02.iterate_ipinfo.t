@@ -4,6 +4,8 @@ use Simple::IPInfo;
 use Data::Dumper;
 use Test::More ;
 
+$Simple::IPInfo::DEBUG =1 ;
+
 my $f = '02.ip_raw.csv';
 my $r = get_ipinfo(
     $f, 

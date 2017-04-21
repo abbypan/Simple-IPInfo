@@ -6,7 +6,7 @@ perl ip_loc_update.pl ip_loc.csv ip_loc_taobao.tidy.csv ip_loc_update.csv
 perl ip_loc_from_as.pl ip_loc_update.csv ip_loc_from_as.csv
 perl ip_loc_update.pl ip_loc_update.csv ip_loc_from_as.csv ip_loc.csv
 
-perl make_inet_from_cidr.pl ip_loc.csv inet_loc_raw.csv 'ip,country,isp'
+make_inet_from_cidr.pl ip_loc.csv inet_loc_raw.csv 'ip,country,isp'
 refine_inet.pl inet_loc_raw.csv inet_loc_src.csv
 
 mv inet_loc.csv inet_loc_old.csv

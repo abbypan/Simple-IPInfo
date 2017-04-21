@@ -112,7 +112,6 @@ sub iterate_ipinfo {
     conv_sub => sub {
       my ( $r ) = @_;
       my ( $ip, $inet, $rr ) = calc_ip_inet( $r->[ $opt{i} ], \%opt );
-      print "\r$ip, $s, $e, $inet" if ( $DEBUG );
 
       my $res_r;
 
@@ -130,6 +129,9 @@ sub iterate_ipinfo {
           $res_r = $ir;
         }
       }
+
+      print "$ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
+
       return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
     },
     %opt,

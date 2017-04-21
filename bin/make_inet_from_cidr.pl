@@ -4,6 +4,7 @@ use warnings;
 
 use Net::CIDR qw/cidr2range/;
 use Socket qw/inet_aton/;
+use Data::Dumper;
 
 my ( $src, $dst, $h ) = @ARGV;
 exit unless ( -f $src );
@@ -22,7 +23,8 @@ shift @head;
 print $fhw join( ",", 's', 'e', @head ), "\n";
 while ( <$fh> ) {
   chomp;
-  my @d = m#("[^"]*",|[^,]*,|[^,]*$)#g;
+  my @d = m#("[^"]*",|[^,]*,|[^,]+$)#g;
+  push @d, '' if(/,$/);
   s/,$//  for @d;
   s/"//g  for @d;
   s/,/ /g for @d;

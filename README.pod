@@ -184,7 +184,7 @@ install: curl bunzip2 tar
 
 4) map into inet file, and refine inet_loc_src.csv 
 
-    $ perl make_inet_from_cidr.pl ip_loc.csv inet_loc_raw.csv 'ip,countryrov,isp'
+    $ make_inet_from_cidr.pl ip_loc.csv inet_loc_raw.csv 'ip,country,area,isp'
     $ refine_inet.pl inet_loc_raw.csv inet_loc_src.csv
 
 5) add iso_3166 code for inet_loc_src.csv, use merge_file.pl from SimpleR::Reshape 
