@@ -110,7 +110,7 @@ csv is in xt/ directory
 =head2 add_inet.pl
 
     $ add_inet.pl -f 02.ip_raw.csv -i 0 -d 02.ip_inet.csv
-    $ sort -t, -k3 -n 02.ip_inet.csv > 02.ip_inet.sort.csv
+    $ sort -t, -k3,3 -n 02.ip_inet.csv > 02.ip_inet.sort.csv
 
 =head2 add_ip_info.pl
 
