@@ -134,7 +134,6 @@ sub iterate_ipinfo {
 
       $i = $rem_i; #　last $i to found s,e
 
-
       return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
     },
     %opt,
