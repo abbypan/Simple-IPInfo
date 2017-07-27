@@ -113,32 +113,34 @@ sub iterate_ipinfo {
         my ( $r ) = @_;
         my ( $ip, $inet, $rr ) = calc_ip_inet( $r->[ $opt{i} ], \%opt );
 
-        my $res_r;
+        return [ @$r, @{$rr}{ @{ $opt{ipinfo_names} } } ] if($rr);
 
-        $i = 0 if($i>$n);
-        $i = 0 if($s>$inet);
-        ( $s, $e ) = @{$ip_info->[$i]}{qw/s e/};
-
-        #my $rem_i = $i>$n ? 0 : $i;
-
-        if ( $rr ) {
-            $res_r = $rr;
-        } else {
-            while ( $inet > $e and $i < $n ) {
-                $i++;
-                $ir = $ip_info->[$i];
-                ( $s, $e ) = @{$ir}{qw/s e/};
-            }
-            if ( $inet >= $s and $inet <= $e and $i <= $n ) {
-                $res_r = $ir;
-                print "$i : $ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
-                #$rem_i = $i;
-            }elsif ( $inet < $s or $i > $n ) {
-                $res_r = \%UNKNOWN;
-            }
+        #start from i=0
+        if($i>$n){
+            $i = 0;
+            ( $s, $e ) = @{$ip_info->[$i]}{qw/s e/};
         }
 
-        #$i = $rem_i; #　last $i to found s,e
+        #<- to nearby $i
+        while($inet<$s and $i>0){
+            $i = int($i/2);
+            ( $s, $e ) = @{$ip_info->[$i]}{qw/s e/};
+        }
+
+        #-> to nearby $i
+        while ( $inet > $e and $i < $n ) {
+            $i++;
+            $ir = $ip_info->[$i];
+            ( $s, $e ) = @{$ir}{qw/s e/};
+        }
+
+        my $res_r;
+        if ( $inet >= $s and $inet <= $e and $i <= $n ) {
+            $res_r = $ir;
+            print "$i : $ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
+        }elsif ( $inet < $s or $i > $n ) {
+                $res_r = \%UNKNOWN;
+        }
 
         return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
     },
