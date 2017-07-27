@@ -110,33 +110,37 @@ sub iterate_ipinfo {
   my $res = read_table(
     $ip_list,
     conv_sub => sub {
-      my ( $r ) = @_;
-      my ( $ip, $inet, $rr ) = calc_ip_inet( $r->[ $opt{i} ], \%opt );
+        my ( $r ) = @_;
+        my ( $ip, $inet, $rr ) = calc_ip_inet( $r->[ $opt{i} ], \%opt );
 
-      my $res_r;
+        my $res_r;
 
-      my $rem_i = $i>$n ? 0 : $i;
+        $i = 0 if($i>$n);
+        $i = 0 if($s>$inet);
+        ( $s, $e ) = @{$ip_info->[$i]}{qw/s e/};
 
-      if ( $rr ) {
-        $res_r = $rr;
-      } elsif ( $inet < $s or $i > $n ) {
-        $res_r = \%UNKNOWN;
-      } else {
-        while ( $inet > $e and $i < $n ) {
-          $i++;
-          $ir = $ip_info->[$i];
-          ( $s, $e ) = @{$ir}{qw/s e/};
+        #my $rem_i = $i>$n ? 0 : $i;
+
+        if ( $rr ) {
+            $res_r = $rr;
+        } else {
+            while ( $inet > $e and $i < $n ) {
+                $i++;
+                $ir = $ip_info->[$i];
+                ( $s, $e ) = @{$ir}{qw/s e/};
+            }
+            if ( $inet >= $s and $inet <= $e and $i <= $n ) {
+                $res_r = $ir;
+                print "$i : $ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
+                #$rem_i = $i;
+            }elsif ( $inet < $s or $i > $n ) {
+                $res_r = \%UNKNOWN;
+            }
         }
-        if ( $inet >= $s and $inet <= $e and $i <= $n ) {
-          $res_r = $ir;
-          print "$i : $ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
-          $rem_i = $i;
-        }
-      }
 
-      $i = $rem_i; #　last $i to found s,e
+        #$i = $rem_i; #　last $i to found s,e
 
-      return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
+        return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
     },
     %opt,
   );
