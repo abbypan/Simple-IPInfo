@@ -52,7 +52,7 @@ sub cidr_to_range {
 
 sub get_ipinfo {
   my ( $ip_list, %opt ) = @_;
-  $opt{i}               //= 0;
+  $opt{i}               ||= 0;
   $opt{return_arrayref} //= 1;
 
   my $i       = 0;
@@ -96,10 +96,10 @@ sub iterate_ipinfo {
 
   #deal with large ip_list file, ip_list is inet-sorted
   my ( $ip_list, %opt ) = @_;
-  $opt{i}               //= 0;
-  $opt{return_arrayref} //= 0;
-  $opt{ipinfo_file}  //= $IPINFO_LOC_F;
-  $opt{ipinfo_names} //= [qw/country area isp country_code area_code isp_code/];
+  $opt{i}               ||= 0;
+  $opt{return_arrayref} ||= 0;
+  $opt{ipinfo_file}  ||= $IPINFO_LOC_F;
+  $opt{ipinfo_names} ||= [qw/country area isp country_code area_code isp_code/];
 
   my $ip_info = read_ipinfo( $opt{ipinfo_file} );
   my $n       = $#$ip_info;
