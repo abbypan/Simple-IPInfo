@@ -22,6 +22,8 @@ use JSON;
 use File::Spec;
 use Net::CIDR qw/cidr2range/;
 use Socket qw/inet_aton inet_ntoa/;
+use Memoize;
+memoize( 'read_ipinfo' );
 
 our $DEBUG = 0;
 
