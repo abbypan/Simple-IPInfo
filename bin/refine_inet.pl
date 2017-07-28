@@ -14,7 +14,7 @@ while ( <$fh> ) {
   chomp;
   my ( $s, $e, $d ) = m#^(\d+),(\d+),(.*)$#;
   $d //= '';
-  print "$old_s, $old_e, $old_d => $s, $e, $d\n" if($d==15169);
+  #print "$old_s, $old_e, $old_d => $s, $e, $d\n" if($d==15169);
   if ( ( $old_d eq $d ) and (
           ( $s<=$old_e+1 )
       )) {

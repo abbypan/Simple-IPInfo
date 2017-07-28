@@ -27,7 +27,7 @@ memoize( 'read_ipinfo' );
 
 our $DEBUG = 0;
 
-our $VERSION = 0.11;
+our $VERSION = 0.12;
 
 my ( $vol, $dir, $file ) = File::Spec->splitpath( __FILE__ );
 our $IPINFO_LOC_F = File::Spec->catpath( $vol, $dir, "inet_loc.csv" );
