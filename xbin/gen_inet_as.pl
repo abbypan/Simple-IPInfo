@@ -15,9 +15,11 @@ my $in_file = 'originas';
 my $temp = "$in_file.inet";
 parse_raw_file($in_file, $temp);
 system(qq[sort -t, -k1,1 -n $temp | uniq > $temp.sort]);
-system(qq[refine_inet.pl $temp.sort $dst.clean]);
+system(qq[refine_inet.pl $temp.sort $dst.clean.1]);
+system(qq[sort -t, -k1,1 -n $dst.clean.1 | uniq > $temp.sort.2]);
+system(qq[refine_inet.pl $temp.sort.2 $dst.clean.2]);
 
-fix_gap_as("$dst.clean", $dst);
+fix_gap_as("$dst.clean.2", $dst);
 
 #unlink($temp);
 #unlink("$temp.sort");

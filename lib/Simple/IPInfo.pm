@@ -105,7 +105,7 @@ sub iterate_ipinfo {
   my $n       = $#$ip_info;
 
   my ( $i, $ir ) = ( 0, $ip_info->[0] );
-  my ( $s, $e ) = @{$ir}{qw/s e/};
+  my ( $j, $jr ) = ( $n, $ip_info->[$n] );
 
   my $res = read_table(
     $ip_list,
@@ -114,32 +114,45 @@ sub iterate_ipinfo {
         my ( $ip, $inet, $rr ) = calc_ip_inet( $r->[ $opt{i} ], \%opt );
 
         return [ @$r, @{$rr}{ @{ $opt{ipinfo_names} } } ] if($rr);
-
-        #start from i=0
-        if($i>$n){
-            $i = 0;
-            ( $s, $e ) = @{$ip_info->[$i]}{qw/s e/};
+        
+        if($ir->{s}>$inet){
+            ($j, $jr) = ($i, $ir);
+            ($i, $ir) = (0, $ip_info->[0]);
         }
 
-        #<- to nearby $i
-        while($inet<$s and $i>0){
-            $i = int($i/2);
-            ( $s, $e ) = @{$ip_info->[$i]}{qw/s e/};
+        if($jr->{e}<$inet){
+            ( $j, $jr ) = ( $n, $ip_info->[$n] );
         }
-
-        #-> to nearby $i
-        while ( $inet > $e and $i < $n ) {
-            $i++;
-            $ir = $ip_info->[$i];
-            ( $s, $e ) = @{$ir}{qw/s e/};
-        }
-
+        
         my $res_r;
-        if ( $inet >= $s and $inet <= $e and $i <= $n ) {
-            $res_r = $ir;
-            print "$i : $ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
-        }elsif ( $inet < $s or $i > $n ) {
-                $res_r = \%UNKNOWN;
+        while($i<=$j and $inet>=$ir->{s} and $inet<=$jr->{e}){
+            if($inet<=$ir->{e}){
+                $res_r = $ir;
+                last;
+            }elsif($inet>=$jr->{s}){
+                $res_r = $jr;
+                last;
+            }else{
+                #print "$i, $j, $k\n";
+                my $k = int(($j+$i)/2);
+                last if($k==$i or $k==$j);
+
+                my $kr = $ip_info->[$k];
+                if($inet>=$kr->{s} and $inet<=$kr->{e}){
+                    $res_r = $kr;
+                    last;
+                }elsif($inet>$kr->{e}){
+                    ($i, $ir) = ($k, $kr);
+                }elsif($inet<$kr->{s}){
+                    ($j, $jr) = ($k, $kr);
+                }
+            }
+        }
+
+        if ( $res_r ) {
+            print "$ip, start $res_r->{s}, end $res_r->{e}, inet $inet\n" if ( $DEBUG );
+        }else {
+            $res_r = \%UNKNOWN;
         }
 
         return [ @$r, @{$res_r}{ @{ $opt{ipinfo_names} } } ];
