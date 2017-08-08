@@ -142,13 +142,33 @@ make_inet_from_cidr.pl [src_file] [dst_file]
 
 refine_inet.pl [src_file] [dst_file]
 
-src_file's inet is sorted by csvsort
+src_file's inet is sorted
 
     $ csvsort isp_inet.csv > isp_inet.csv.sort
     $ refine_inet.pl isp_inet.csv.sort isp_inet.csv.sort.refine
 
     $ csvsort city_inet.csv > city_inet.csv.sort
     $ refine_inet.pl city_inet.csv.sort city_inet.csv.sort.refine
+
+=head2 chop_inet.pl
+
+chop_inet.pl [src_file] [dst_file]
+
+src_file's inet is sorted
+
+xbin/data/ shows difference between refine_inet.pl and chop_inet.pl 
+
+    $ cd xbin/data
+    $ sort -t, -k1,1 -n test.csv > t1.csv
+    $ perl ../../bin/refine_inet.pl t1.csv t2.csv
+    $ sort -t, -k1,1 -n t2.csv > t3.csv
+    $ perl ../../bin/refine_inet.pl t3.csv t4.csv
+    $ sort -t, -k1,1 -n t4.csv > t5.csv
+    $ perl ../../bin/refine_inet.pl t5.csv t6.csv
+
+    $ perl ../../bin/chop_inet.pl test.csv tc.csv
+
+    $ diff t6.csv tc.csv
 
 =head2 merge_inet.pl 
 

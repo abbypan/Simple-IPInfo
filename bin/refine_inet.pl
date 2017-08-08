@@ -22,7 +22,9 @@ while ( <$fh> ) {
   }elsif( ($old_d eq $d) and ($s>=$old_s) and ($e<=$old_e)){
           #not change
   }elsif(($old_d ne $d) and ($old_e>$s)){
-    print $fhw join( ",", $old_s, $s-1, $old_d ), "\n";
+      if($s-1>=$old_s){
+          print $fhw join( ",", $old_s, $s-1, $old_d ), "\n";
+      }
     if($e>$old_e){
         ( $old_s, $old_e, $old_d ) = ( $s, $e, $d );
     }else{
